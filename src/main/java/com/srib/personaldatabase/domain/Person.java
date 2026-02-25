@@ -1,4 +1,4 @@
-package com.srib.personaldatabase;
+package com.srib.personaldatabase.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
@@ -8,8 +8,6 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @Entity
 @Data
@@ -40,7 +38,6 @@ public class Person {
     private String role;
 
     private String lastSignedContract;
-
 
 
 
