@@ -35,7 +35,7 @@ public class Person {
 
     private String studentCardNumber;
 
-    private String rolee;
+    private String role;
 
     private String lastSignedContract;
 
