@@ -48,8 +48,21 @@ public class Person {
     private String role;
 
     private String lastSignedContract;
+
     @ManyToMany
-    @JoinTable(name = "person_group", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
+    @JoinTable(
+        name = "person_group",
+        joinColumns = @JoinColumn(name = "person_id"),
+        inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
     private Set<Group> groups = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "person_course",
+        joinColumns = @JoinColumn(name = "person_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private Set<Course> courses = new HashSet<>();
 
 }
