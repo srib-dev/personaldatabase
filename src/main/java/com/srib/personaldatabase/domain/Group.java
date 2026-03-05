@@ -32,7 +32,9 @@ public class Group {
   private Long group_id;
 
   private String group_name;
+
   private String group_description;
+  
   private LocalDateTime group_created_date;
 
   @ManyToMany(mappedBy = "groups")
