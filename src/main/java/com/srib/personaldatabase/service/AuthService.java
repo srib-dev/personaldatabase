@@ -17,6 +17,7 @@ public class AuthService {
 
     private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final JWTService jWTService;
 
     public Admin registerAdmin(String username, String rawPassword) {
         adminRepository.findByUsername(username).ifPresent(a -> {
@@ -28,10 +29,14 @@ public class AuthService {
         return adminRepository.save(admin);
     }
 
-    public boolean authenticate(String username, String rawPassword) {
-        return adminRepository.findByUsername(username)
-            .map(admin -> passwordEncoder.matches(rawPassword, admin.getPasswordHash()))
-            .orElse(false);
+    public String authenticate(String username, String rawPassword) {
+        // TODO: Change this quick fix to be more logical
+        Admin admin = adminRepository.findByUsername(username).orElse(null);
+        if ( admin == null ||
+                !passwordEncoder.matches(rawPassword, admin.getPasswordHash()) ) {
+            return null;
+        }
+        return jWTService.generateToken(admin);
     }
     
     public Optional<Admin> findByUsername(String username) {
