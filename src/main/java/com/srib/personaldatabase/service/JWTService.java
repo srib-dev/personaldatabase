@@ -21,9 +21,9 @@ import java.util.Date;
 @Service
 public class JWTService {
 
-	private ECPrivateKey privateKey;
-	private ECPublicKey publicKey;
-	private int expiresIn = 24 * 60 * 60;
+	private final ECPrivateKey privateKey;
+	private final ECPublicKey publicKey;
+	private final int expiresIn = 24 * 60 * 60;
 
 	JWTService(ECPublicKey publicKey, ECPrivateKey privateKey) {
 		this.publicKey = publicKey;
