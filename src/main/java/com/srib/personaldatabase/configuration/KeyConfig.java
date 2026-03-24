@@ -1,3 +1,5 @@
+package com.srib.personaldatabase.configuration;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,7 +18,7 @@ import java.util.Base64;
 public class KeyConfig {
 	@Bean
 	public ECPrivateKey jwtPrivateKey() throws Exception {
-		String pem = Files.readString(Path.of("/run/secrets/jwt-private-key"));
+		String pem = Files.readString(Path.of("/run/secrets/jwt_private_key"));
 
 		String strippedPem = pem.replace("-----BEGIN PRIVATE KEY-----", "")
 			.replace("-----END PRIVATE KEY-----", "")
@@ -31,7 +33,7 @@ public class KeyConfig {
 	}
 	@Bean
 	public ECPublicKey jwtPublicKey() throws Exception {
-		String pem = Files.readString(Path.of("/run/secrets/jwt-public-key"));
+		String pem = Files.readString(Path.of("/run/secrets/jwt_public_key"));
 		String strippedPem = pem.replace("-----BEGIN PUBLIC KEY-----", "")
 			.replace("-----END PUBLIC KEY-----", "")
 			.replaceAll("\\s", "");
