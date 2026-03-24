@@ -1,6 +1,8 @@
 package com.srib.personaldatabase.service;
 
+import com.srib.personaldatabase.domain.Admin;
 import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -23,7 +25,7 @@ public class JWTService {
 	private ECPublicKey publicKey;
 	private int expiresIn = 24 * 60 * 60;
 
-	puclic JWTService(ECPublicKey publicKey, ECPrivateKey privateKey) {
+	JWTService(ECPublicKey publicKey, ECPrivateKey privateKey) {
 		this.publicKey = publicKey;
 		this.privateKey = privateKey;
 	}
@@ -44,7 +46,7 @@ public class JWTService {
 			.signWith(privateKey, Jwts.SIG.ES256).compact();
 		return token;
 		} catch (SecurityException e) {
-        	throw new TokenGenerationException("Failed to sign token", e);
+        	throw new IllegalStateException("Failed to sign token", e);
     	}
 	}
 
@@ -57,15 +59,15 @@ public class JWTService {
 				.getPayload()
 				.getSubject();
 		} catch (ExpiredJwtException e) {
-			throw new AuthenticationException("Token has expired");
+			throw new BadCredentialsException("Token has expired");
 		}  catch (UnsupportedJwtException e) {
-        	throw new AuthenticationException("Unsupported token format");
+        	throw new BadCredentialsException("Unsupported token format");
     	} catch (MalformedJwtException e) {
-        	throw new AuthenticationException("Malformed token");
+        	throw new BadCredentialsException("Malformed token");
     	} catch (SecurityException e) {
-        	throw new AuthenticationException("Invalid token signature");
+        	throw new BadCredentialsException("Invalid token signature");
     	} catch (IllegalArgumentException e) {
-        	throw new AuthenticationException("Token is null or empty");
+        	throw new BadCredentialsException("Token is null or empty");
 		}
 	} 
 
