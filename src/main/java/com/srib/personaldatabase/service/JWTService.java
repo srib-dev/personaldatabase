@@ -33,16 +33,24 @@ public class JWTService {
 	// Method creates a JWT token 
 	// Signed with the ES256 algorithm
 	public String generateToken(Admin admin) {
+		if (admin == null || admin.getId() == null) {
+			throw new IllegalArgumentException("User or user ID cannot be null");
+		}
+		
+		try {
 		String token = Jwts.builder().subject(admin.getId().toString())
 			.issuedAt(new Date(System.currentTimeMillis()))
 			.expiration(new Date(System.currentTimeMillis() + expiresIn * 1000))
 			.signWith(privateKey, Jwts.SIG.ES256).compact();
 		return token;
+		} catch (SecurityException e) {
+        	throw new TokenGenerationException("Failed to sign token", e);
+    	}
 	}
 
 	public String validateToken(String token) {
 		try {
-			return Jwts.pardser()
+			return Jwts.parser()
 				.verifyWith(publicKey)
 				.build()
 				.parseSignedClaims(token)
@@ -59,7 +67,6 @@ public class JWTService {
     	} catch (IllegalArgumentException e) {
         	throw new AuthenticationException("Token is null or empty");
 		}
-    
 	} 
 
 
