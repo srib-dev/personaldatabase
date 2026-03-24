@@ -28,18 +28,18 @@ public class AdminController {
     public ResponseEntity<RegisterAdminResponse> register(@RequestBody RegisterAdminRequest request) {
         Admin admin = authService.registerAdmin(request.username(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new RegisterAdminResponse(admin.getId(), admin.getUsername()));
+                    .body(new RegisterAdminResponse(admin.getId(), admin.getUsername())); 
     }
 
     @Operation(summary = "Login admin") 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        boolean ok = authService.authenticate(request.username(), request.password());
-        if (!ok) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponse(false, "Invalid username or password"));
+        String token = authService.authenticate(request.username(), request.password());
+        if ( token != null) {
+            return ResponseEntity.ok(new LoginResponse(true, token));
         }
-        return ResponseEntity.ok(new LoginResponse(true, "Login succesful"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new LoginResponse(false, "Invalid username or password"));
     }
 
     public record RegisterAdminRequest(String username, String password) {}
