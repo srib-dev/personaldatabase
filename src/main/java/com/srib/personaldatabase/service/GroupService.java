@@ -32,4 +32,22 @@ public class GroupService {
     person.getGroups().add(group);
     personRepository.save(person);
   }
+
+  public Group updateGroup(Long id, Group updated) {
+    Group existing = groupRepository.findById(id).orElseThrow();
+    existing.setGroup_name(updated.getGroup_name());
+    existing.setGroup_description(updated.getGroup_description());
+    return groupRepository.save(existing);
+  }
+
+  public void deleteGroup(Long id) {
+    groupRepository.deleteById(id);
+  }
+
+  public void removePersonFromGroup(Long groupId, Long personId) {
+    Person person = personRepository.findById(personId).orElseThrow();
+    Group group = groupRepository.findById(groupId).orElseThrow();
+    person.getGroups().remove(group);
+    personRepository.save(person);
+  }
 }

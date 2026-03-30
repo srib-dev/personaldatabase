@@ -7,6 +7,7 @@ import com.srib.personaldatabase.repository.AdminRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,5 +37,24 @@ public class AuthService {
     
     public Optional<Admin> findByUsername(String username) {
         return adminRepository.findByUsername(username);
+    }
+
+    public List<Admin> getAllAdmins() {
+        return adminRepository.findAll();
+    }
+
+    public Admin updateAdmin(Long id, String newUsername, String newRawPassword) {
+        Admin admin = adminRepository.findById(id).orElseThrow();
+        if (newUsername != null && !newUsername.isBlank()) {
+            admin.setUsername(newUsername);
+        }
+        if (newRawPassword != null && !newRawPassword.isBlank()) {
+            admin.setPasswordHash(passwordEncoder.encode(newRawPassword));
+        }
+        return adminRepository.save(admin);
+    }
+
+    public void deleteAdmin(Long id) {
+        adminRepository.deleteById(id);
     }
 }
