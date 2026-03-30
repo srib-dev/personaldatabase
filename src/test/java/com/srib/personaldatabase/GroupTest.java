@@ -1,5 +1,6 @@
 package com.srib.personaldatabase;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.srib.personaldatabase.domain.Group;
+import com.srib.personaldatabase.domain.Person;
 import com.srib.personaldatabase.repository.GroupRepository;
+import com.srib.personaldatabase.repository.PersonRepository;
 import com.srib.personaldatabase.service.GroupService;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +27,9 @@ public class GroupTest {
 
     @Mock
     private GroupRepository groupRepository;
+
+    @Mock
+    private PersonRepository personRepository;
 
     @InjectMocks
     private GroupService groupService;
@@ -33,8 +39,8 @@ public class GroupTest {
 
     @BeforeEach
     void setUp() {
-        g1 = new Group(1L, "Admins", "Admin group", null, null);
-        g2 = new Group(2L, "Users", "User group", null, null);
+        g1 = new Group(1L, "Admins", "Admin group", null, new HashSet<>());
+        g2 = new Group(2L, "Users", "User group", null, new HashSet<>());
     }
 
     @Test
@@ -73,7 +79,7 @@ public class GroupTest {
     @Test
     @DisplayName("Should update an existing group")
     void updateGroup() {
-        Group updatedGroup = new Group(1L, "Super Admins", "Updated description", null, null);
+        Group updatedGroup = new Group(1L, "Super Admins", "Updated description", null, new HashSet<>());
         when(groupRepository.findById(1L)).thenReturn(Optional.of(g1));
         when(groupRepository.save(any(Group.class))).thenReturn(updatedGroup);
 
@@ -86,5 +92,32 @@ public class GroupTest {
         verify(groupRepository, times(1)).save(any(Group.class));
     }
 
+    @Test
+    @DisplayName("Should add a person to a group")
+    void addPersonToGroup() {
+        Person person = new Person(1L, "Ola", "Nordmann", null, null, null, null, null, null, null, null, new HashSet<>(), new HashSet<>());
+        when(personRepository.findById(1L)).thenReturn(Optional.of(person));
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(g1));
+        when(personRepository.save(any(Person.class))).thenReturn(person);
 
+        groupService.addPersonToGroup(1L, 1L);
+
+        assertTrue(person.getGroups().contains(g1));
+        verify(personRepository, times(1)).save(person);
+    }
+
+    @Test
+    @DisplayName("Should remove a person from a group")
+    void removePersonFromGroup() {
+        Person person = new Person(1L, "Ola", "Nordmann", null, null, null, null, null, null, null, null, new HashSet<>(), new HashSet<>());
+        person.getGroups().add(g1);
+        when(personRepository.findById(1L)).thenReturn(Optional.of(person));
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(g1));
+        when(personRepository.save(any(Person.class))).thenReturn(person);
+
+        groupService.removePersonFromGroup(1L, 1L);
+
+        assertFalse(person.getGroups().contains(g1));
+        verify(personRepository, times(1)).save(person);
+    }
 }
