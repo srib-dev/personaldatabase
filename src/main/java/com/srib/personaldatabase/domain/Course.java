@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.ManyToMany;
 
 @Entity
@@ -22,7 +21,6 @@ import jakarta.persistence.ManyToMany;
 @AllArgsConstructor
 @Table(name = "courses")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "course_id")
 public class Course {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +29,7 @@ public class Course {
   private String course_name;
   private String course_description;
 
+  @JsonIgnore
   @ManyToMany(mappedBy = "courses")
   private Set<Person> persons = new HashSet<>();
 

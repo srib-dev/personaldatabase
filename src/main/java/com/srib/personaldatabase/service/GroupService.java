@@ -41,7 +41,12 @@ public class GroupService {
   }
 
   public void deleteGroup(Long id) {
-    groupRepository.deleteById(id);
+    Group group = groupRepository.findById(id).orElseThrow();
+    for (Person person : group.getPersons()) {
+      person.getGroups().remove(group);
+      personRepository.save(person);
+    }
+    groupRepository.delete(group);
   }
 
   public void removePersonFromGroup(Long groupId, Long personId) {
