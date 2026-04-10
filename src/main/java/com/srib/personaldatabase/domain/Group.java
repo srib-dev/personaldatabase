@@ -1,6 +1,5 @@
 package com.srib.personaldatabase.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,8 +13,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.ManyToMany;
 
 @Entity
@@ -24,7 +22,6 @@ import jakarta.persistence.ManyToMany;
 @AllArgsConstructor
 @Table(name = "groups")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "group_id")
 public class Group {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,6 +34,7 @@ public class Group {
   
   private LocalDateTime group_created_date;
 
+  @JsonIgnore
   @ManyToMany(mappedBy = "groups")
   private Set<Person> persons = new HashSet<>();
 
