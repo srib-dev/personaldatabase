@@ -67,6 +67,26 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Hent alle admin-brukere")
+    @GetMapping("/admins")
+    public List<Admin> getAllAdmins() {
+        return authService.getAllAdmins();
+    }
+
+    @Operation(summary = "Oppdater en admin-bruker")
+    @PutMapping("/admins/{id}")
+    public ResponseEntity<RegisterAdminResponse> updateAdmin(@PathVariable Long id, @RequestBody UpdateAdminRequest request) {
+        Admin admin = authService.updateAdmin(id, request.username(), request.password());
+        return ResponseEntity.ok(new RegisterAdminResponse(admin.getId(), admin.getUsername()));
+    }
+
+    @Operation(summary = "Slett en admin-bruker")
+    @DeleteMapping("/admins/{id}")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) {
+        authService.deleteAdmin(id);
+        return ResponseEntity.noContent().build();
+    }
+
     public record RegisterAdminRequest(String username, String password) {}
     public record RegisterAdminResponse(Long id, String username) {}
 
