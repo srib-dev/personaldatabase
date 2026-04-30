@@ -31,8 +31,8 @@ public class Group {
   private String group_name;
 
   private String group_description;
-  
-  private LocalDateTime group_created_date;
+
+  private LocalDateTime group_created_date = LocalDateTime.now();
 
   @JsonIgnore
   @ManyToMany(mappedBy = "groups")
