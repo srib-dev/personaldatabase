@@ -29,6 +29,8 @@ public class Person {
 
     private String lastName;
 
+    private String birthDate;
+
     private String streetName;
 
     private String postBox;
@@ -36,6 +38,8 @@ public class Person {
     private String phoneNumber;
 
     private String email;
+
+    private String degree;
 
     private String institution;
 

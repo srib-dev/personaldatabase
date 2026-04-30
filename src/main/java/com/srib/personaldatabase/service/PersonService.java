@@ -37,6 +37,8 @@ public class PersonService {
         Person existing = personRepository.findById(id).orElseThrow();
         existing.setFirstName(updated.getFirstName());
         existing.setLastName(updated.getLastName());
+        existing.setBirthDate(updated.getBirthDate());
+        existing.setDegree(updated.getDegree());
         existing.setStreetName(updated.getStreetName());
         existing.setPostBox(updated.getPostBox());
         existing.setPhoneNumber(updated.getPhoneNumber());
