@@ -79,4 +79,10 @@ public class PersonController {
         personService.removePersonFromCourse(personId, courseId);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Totalt antall medlemmer", description = "Returnerer totalt antall medlemmer")
+    @GetMapping("/count")
+    public long getTotalMemberCount() {
+        return personService.getTotalMemberCount();
+    }
 }

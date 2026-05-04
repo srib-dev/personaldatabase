@@ -72,4 +72,8 @@ public class PersonService {
         person.getCourses().remove(course);
         personRepository.save(person);
     }
+
+    public long getTotalMemberCount() {
+        return personRepository.count();
+    }
 }
