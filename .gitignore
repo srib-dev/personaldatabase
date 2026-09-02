@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Database
+*.sqlite3
+*.db
+
+# Type checking & linters
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+
+# IDEs & editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs & temp files
+*.log
+logs/
+
+# Build artifacts / distributions
+dist/
+build/
+*.egg-info/
