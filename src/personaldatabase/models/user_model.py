@@ -4,7 +4,7 @@ from personaldatabase.database.session import Base
 
 
 
-class UserModel(Base):
+class user_model(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)

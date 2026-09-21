@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from personaldatabase.database.session import get_db
-from personaldatabase.models.userModel import UserModel
+from personaldatabase.models.user_model import UserModel
 from personaldatabase.schemas.user import UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])

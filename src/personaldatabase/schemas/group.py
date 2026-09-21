@@ -1,13 +1,13 @@
 from pydantic import BaseModel, ConfigDict
-
+from datetime import date
 
 
 # Filter for henting av data
 
-class user_response(BaseModel):
+class group_response(BaseModel):
     id: int
-    email: str
-    name: str
-    is_admin: bool
+    group_name: str
+    group_created_date: date | None
+
 
     model_config = ConfigDict(from_attributes=True)
