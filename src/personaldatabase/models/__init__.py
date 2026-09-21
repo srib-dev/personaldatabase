@@ -1,3 +1,6 @@
-from personaldatabase.models.user_model import UserModel
+from personaldatabase.models.user_model import user_model
 
-__all__ = ["User_model", "person_model"]
+from personaldatabase.models.person_model import person_model
+
+
+__all__ = ["user_model", "person_model"]
