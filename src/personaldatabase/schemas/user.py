@@ -6,8 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 class user_response(BaseModel):
     id: int
-    email: str
-    name: str
+    verv_id: int
     is_admin: bool
 
     model_config = ConfigDict(from_attributes=True)
