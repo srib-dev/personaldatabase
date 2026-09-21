@@ -10,15 +10,15 @@ class person_response(BaseModel):
     email: str
     first_name: str
     last_name: str
-    school: str | None
-    last_signed_contract: date | None
-    phone_number: str | None
-    postbox: str | None
-    street_name: str | None
-    student_card_number: str
-    status: str | None
+    school: str
+    last_signed_contract: date
+    phone_number: str
+    postbox: str
+    street_name: str
+    student_card_number: int
+    status: bool
     birthdate: date
-    picture: str | None
-    gender: str | None
+    picture: str
+    gender: str
 
     model_config = ConfigDict(from_attributes=True)

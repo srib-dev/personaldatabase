@@ -5,9 +5,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from personaldatabase.database.session import Base
 
 
-class person_group_model(Base):
-    __tablename__ = "person_groups"
+class person_course_model(Base):
+    __tablename__ = "person_courses"
 
     person_id: Mapped[int] = mapped_column(ForeignKey("persons.id"), primary_key=True)
-    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), primary_key=True)
-    when_joined_group: Mapped[date] = mapped_column(Date, nullable=False)
+    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), primary_key=True)
+    course_date: Mapped[date] = mapped_column(Date, nullable=False)
