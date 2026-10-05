@@ -1,7 +1,11 @@
+from personaldatabase.models import person_verv_model
+from typing import Optional
+from personaldatabase.models import person_group_model
+from personaldatabase.models import person_course_model
 from datetime import date
-
+from personaldatabase.models import verv_model
 from sqlalchemy import Boolean, Date, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from personaldatabase.database.session import Base
 
 
@@ -22,3 +26,7 @@ class person_model(Base):
     birthdate: Mapped[date] = mapped_column(Date, nullable=False)
     picture: Mapped[str] = mapped_column(String(512), nullable=False)
     gender: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    courses: Mapped[list["person_course_model"]] = relationship(back_populates="person")
+    groups: Mapped[list["person_group_model"]] = relationship(back_populates="person")
+    verv: Mapped[list["person_verv_model"]] = relationship(back_populates="person")

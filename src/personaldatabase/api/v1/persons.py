@@ -4,11 +4,30 @@ from sqlalchemy import select
 
 from personaldatabase.database.session import get_db
 from personaldatabase.models.person_model import person_model
-from personaldatabase.schemas.person import person_response
+from personaldatabase.schemas.person import person_create, person_response
 
 
 
 router = APIRouter(prefix="/persons", tags=["Persons"])
+
+
+@router.post("/", response_model=person_response, status_code=status.HTTP_201_CREATED)
+def create_person(person_in: person_create, db: Session = Depends(get_db)):
+    existing_person = db.scalar(
+        select(person_model).where(person_model.email == person_in.email)
+    )
+    if existing_person:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="En person med denne e-postadressen eksisterer allerede",
+        )
+
+    db_person = person_model(**person_in.model_dump())
+    db.add(db_person)
+    db.commit()
+    db.refresh(db_person)
+    return db_person
+
 
 
 @router.get("/{id}", response_model=person_response)
