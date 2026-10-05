@@ -60,3 +60,17 @@ def delete_person(id: int, db: Session = Depends(get_db)):
         )
     db.delete(person)
     db.commit()
+
+@router.patch("/{id}/toggle-active", response_model=person_response)
+def toggle_person_active(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    person.is_active = not person.is_active
+    db.commit()
+    db.refresh(person)
+    return person

@@ -19,6 +19,7 @@ class person_base(BaseModel):
     birthdate: date
     picture: str
     gender: str
+    is_active: bool = True
 
 
 # Skjema for å opprette ny person

@@ -28,6 +28,8 @@ class PersonModel(Base):
     birthdate: Mapped[date] = mapped_column(Date, nullable=False)
     picture: Mapped[str] = mapped_column(String(512), nullable=False)
     gender: Mapped[str] = mapped_column(String(50), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    
 
     courses: Mapped[list["PersonCourseModel"]] = relationship(back_populates="person")
     groups: Mapped[list["PersonGroupModel"]] = relationship(back_populates="person")
