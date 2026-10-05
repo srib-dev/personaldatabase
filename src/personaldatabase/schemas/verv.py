@@ -1,12 +1,11 @@
 from pydantic import BaseModel, ConfigDict
 
 
-
 # Filter for henting av data
 
-class user_response(BaseModel):
+class verv_response(BaseModel):
     id: int
-    verv_id: int
-    is_admin: bool
+    verv_name: str
+    role: str
 
     model_config = ConfigDict(from_attributes=True)
