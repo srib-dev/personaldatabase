@@ -1,11 +1,20 @@
+from typing import TYPE_CHECKING
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from personaldatabase.database.session import Base
 
+if TYPE_CHECKING:
+    from personaldatabase.models.person_course_model import PersonCourseModel
 
-class course_model(Base):
+
+class CourseModel(Base):
     __tablename__ = "courses"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     course_name: Mapped[str] = mapped_column(String(100), nullable=False)
     course_provider: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    persons: Mapped[list["PersonCourseModel"]] = relationship(back_populates="course")
+
+
+    
