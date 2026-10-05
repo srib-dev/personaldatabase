@@ -7,7 +7,6 @@ from personaldatabase.models.person_model import PersonModel
 from personaldatabase.schemas.person import person_create, person_response
 
 
-
 router = APIRouter(prefix="/persons", tags=["Persons"])
 
 
@@ -29,9 +28,8 @@ def create_person(person_in: person_create, db: Session = Depends(get_db)):
     return db_person
 
 
-
 @router.get("/{id}", response_model=person_response)
-def get_personr(id: int, db: Session = Depends(get_db)):
+def get_person(id: int, db: Session = Depends(get_db)):
     person = db.get(PersonModel, id)
     if not person:
         raise HTTPException(
@@ -45,8 +43,20 @@ def get_personr(id: int, db: Session = Depends(get_db)):
 def get_all_persons(
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0, description="Antall rader å hoppe over"),
-    limit: int = Query(50, ge=1, le=100, description="Maks antall rader (maks 100)"),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maks antall rader (maks 100)"),
 ):
     query = select(PersonModel).offset(skip).limit(limit)
     return db.scalars(query).all()
 
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_person(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet"
+        )
+    db.delete(person)
+    db.commit()
