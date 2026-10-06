@@ -15,4 +15,4 @@ class GroupModel(Base):
     group_name: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     group_created_date: Mapped[date] = mapped_column(Date, nullable=False)
 
-    members: Mapped[list["PersonGroupModel"]] = relationship(back_populates="group")
+    members: Mapped[list["PersonGroupModel"]] = relationship(back_populates="group")
