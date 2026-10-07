@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from datetime import date
 
 from pydantic import BaseModel, ConfigDict
@@ -20,6 +21,12 @@ class person_base(BaseModel):
     picture: str
     gender: str
     is_active: bool = True
+
+    #gjør email lowercase (hindrer duplikate personer)
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, v: str) -> str:
+        return v.strip().lower()
 
 
 # Skjema for å opprette ny person

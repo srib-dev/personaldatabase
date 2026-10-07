@@ -1,3 +1,5 @@
+from sqlalchemy.util.typing import Literal
+from fastapi import Body
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, or_
@@ -26,14 +28,53 @@ def create_person(person_in: person_create, db: Session = Depends(get_db)):
     db.refresh(db_person)
     return db_person
 
+@router.post(
+    "/bulk",
+    response_model=list[person_response],
+    status_code=status.HTTP_201_CREATED,
+)
+@router.post("/bulk", status_code=status.HTTP_201_CREATED)
+def create_persons_bulk(
+    persons_in: list[person_create] = Body(..., max_length=100),
+    db: Session = Depends(get_db),
+):
+    if not persons_in:
+        return []
+
+    emails = [p.email.lower() for p in persons_in]
+    if len(emails) != len(set(emails)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Listen inneholder duplikate e-postadresser",
+        )
+
+    existing_emails = set(
+        db.scalars(
+            select(PersonModel.email).where(PersonModel.email.in_(emails))
+        ).all()
+    )
+    if existing_emails:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Følgende e-poster eksisterer allerede: {', '.join(existing_emails)}",
+        )
+
+    db_persons = [PersonModel(**p.model_dump()) for p in persons_in]
+    db.add_all(db_persons)
+    db.commit()
+
+    for person in db_persons:
+        db.refresh(person)
+
+    return db_persons
 
 @router.get("/search", response_model=list[person_response])
 def search_persons(
-    q: str = Query(..., min_length=2, description="Søkeord (minst 2 tegn)"),
+    query: str = Query(..., min_length=2, description="Søkeord (minst 2 tegn)"),
     db: Session = Depends(get_db),
     limit: int = Query(20, ge=1, le=50, description="Maks antall treff som returneres"),
 ) -> list[PersonModel]:
-    search_term = f"%{q.strip()}%"
+    search_term = f"%{query.strip()}%"
 
     query = (
         select(PersonModel)
@@ -64,10 +105,18 @@ def get_person(id: int, db: Session = Depends(get_db)):
 def get_all_persons(
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0, description="Antall rader å hoppe over"),
-    limit: int = Query(
-        50, ge=1, le=100, description="Maks antall rader (maks 100)"),
+    limit: int = Query(50, ge=1, le=100, description="Maks antall rader (maks 100)"),
+    status: Literal["active", "inactive", "all"] = Query(
+        "active", description="Filtrer personer etter status ('active', 'inactive', 'all')"
+    ),
 ):
-    query = select(PersonModel).offset(skip).limit(limit)
+    query = select(PersonModel)
+    if status == "active":
+        query = query.where(PersonModel.is_active.is_(True))
+    elif status == "inactive":
+        query = query.where(PersonModel.is_active.is_(False))
+
+    query = query.offset(skip).limit(limit)
     return db.scalars(query).all()
 
 
