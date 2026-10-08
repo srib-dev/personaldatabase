@@ -2,8 +2,35 @@ Setup:
 
 1
 
-# Mac / Linux:
-python3 -m venv .venv
+# Mac: 
+
+python -m venv .venv
+
+# Linux:
+
+## Fedora
+
+*In terminal of this projects root folder*
+
+Make sure you have uv installed:
+
+`curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+Create the virtual environment:
+
+`python3 -m venv .venv`
+
+Activate the virtual environment:
+
+`source .venv/bin/activate`
+
+Install requirements:
+
+`pip install -r requirements.txt`
+
+Run the project locally:
+
+`uv run fastapi dev`
 
 # Windows:
 python -m venv .venv
