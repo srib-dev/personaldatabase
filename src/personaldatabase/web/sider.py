@@ -55,4 +55,8 @@ def godkjenning(request: Request):
 
 @router.get("/admin")
 def admin(request: Request):
-    return templates.TemplateResponse(request, "admin/index.html")
+    return templates.TemplateResponse(request, "admin/index.html", {
+        "er_superadmin": True,
+        "admin_brukere": [],
+        "grupper": [],
+    })

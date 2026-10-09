@@ -3,6 +3,126 @@
 {% block tittel %}Admin{% endblock %}
 
 {% block innhold %}
+<style>
+  .admin-seksjon { margin-bottom: 2.5rem; }
+  .admin-seksjon h2 { margin: 0 0 0.25rem; font-size: 1.25rem; }
+  .admin-seksjon .forklaring { margin: 0 0 1rem; color: var(--tekst-dempet); }
+  .seksjon-topp {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
+  th { background: var(--flate); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .handlinger { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .knapp {
+    padding: 0.4rem 0.8rem; border: 1px solid var(--kant); border-radius: 4px;
+    background: var(--bakgrunn); color: inherit; font: inherit; cursor: pointer;
+  }
+  .knapp-hoved { background: var(--lilla); border-color: var(--lilla); color: #fff; }
+  .knapp-fare { color: #b42318; }
+  .knapp:focus-visible { outline: 2px solid var(--lilla); outline-offset: 2px; }
+  .status { padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.875rem; background: var(--flate); }
+  .status-aktiv { background: #e6f4ea; }
+  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
+</style>
+
 <h1>Admin</h1>
-<p>Forvalte admin-brukere og grupper.</p>
+
+{# ---------- Admin-brukere: bare for super-administratorer ---------- #}
+{% if er_superadmin %}
+<section class="admin-seksjon" aria-labelledby="admin-brukere-tittel">
+  <div class="seksjon-topp">
+    <div>
+      <h2 id="admin-brukere-tittel">Admin-brukere</h2>
+      <p class="forklaring">Opprett, rediger og slett administratorer og gruppeadministratorer.</p>
+    </div>
+    {# TODO: koble til når backend har endepunkt for å opprette admin-bruker #}
+    <button class="knapp knapp-hoved" type="button">Ny admin-bruker</button>
+  </div>
+
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Navn</th>
+          <th scope="col">E-post</th>
+          <th scope="col">Rolle</th>
+          <th scope="col">Handlinger</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bruker in admin_brukere %}
+        <tr>
+          <td>{{ bruker.navn }}</td>
+          <td>{{ bruker.epost }}</td>
+          <td>{{ bruker.rolle }}</td>
+          <td>
+            <div class="handlinger">
+              {# TODO: koble til redigering og sletting når endepunktene finnes #}
+              <button class="knapp" type="button">Rediger</button>
+              <button class="knapp knapp-fare" type="button">Slett</button>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="tomt">Ingen admin-brukere ennå.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+{# ---------- Grupper ---------- #}
+<section class="admin-seksjon" aria-labelledby="grupper-tittel">
+  <div class="seksjon-topp">
+    <div>
+      <h2 id="grupper-tittel">Grupper</h2>
+      <p class="forklaring">Opprett, rediger og arkiver grupper, og legg grupper på is eller start dem opp igjen.</p>
+    </div>
+    {# TODO: koble til når backend har endepunkt for å opprette gruppe #}
+    <button class="knapp knapp-hoved" type="button">Ny gruppe</button>
+  </div>
+
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Navn</th>
+          <th scope="col">Status</th>
+          <th scope="col">Handlinger</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for gruppe in grupper %}
+        <tr>
+          <td><a href="/grupper/{{ gruppe.id }}">{{ gruppe.navn }}</a></td>
+          <td>
+            {% if gruppe.aktiv %}
+              <span class="status status-aktiv">Aktiv</span>
+            {% else %}
+              <span class="status">På is</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="handlinger">
+              {# TODO: koble til når endepunktene for å endre gruppe finnes #}
+              <button class="knapp" type="button">Rediger</button>
+              <button class="knapp" type="button">
+                {% if gruppe.aktiv %}Legg på is{% else %}Start opp igjen{% endif %}
+              </button>
+              <button class="knapp knapp-fare" type="button">Arkiver</button>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="tomt">Ingen grupper ennå. Opprett den første med «Ny gruppe».</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block tittel %}Personaldatabase{% endblock %} – SRiB</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <style>
+    :root {
+      --lilla: #97257b;
+      --svart: #040707;
+      --bakgrunn: #ffffff;
+      --flate: #f4f4f5;
+      --kant: #d4d4d8;
+      --tekst-dempet: #52525b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--svart);
+      background: var(--bakgrunn);
+      line-height: 1.5;
+    }
+    .toppmeny {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.25rem;
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--kant);
+    }
+    .toppmeny a { color: var(--svart); text-decoration: none; }
+    .toppmeny a:hover { color: var(--lilla); }
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+  </style>
+</head>
+<body>
+  <nav class="toppmeny">
+    <a href="/">Dashboard</a>
+    <a href="/min-profil">Min profil</a>
+    <a href="/statistikk">Statistikk</a>
+    <a href="/kurs">Kurs</a>
+    <a href="/grupper">Grupper</a>
+    <a href="/godkjenning">Godkjenning</a>
+    <a href="/admin">Admin</a>
+  </nav>
+  <main>
+    {% block innhold %}{% endblock %}
+  </main>
+</body>
+</html> 
