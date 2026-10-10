@@ -4,48 +4,203 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block tittel %}Personaldatabase{% endblock %} – SRiB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <style>
     :root {
-      --lilla: #97257b;
-      --svart: #040707;
-      --bakgrunn: #ffffff;
-      --flate: #f4f4f5;
-      --kant: #d4d4d8;
-      --tekst-dempet: #52525b;
+      --sol: #f6c445;
+      --sol-lys: #fdf1cf;
+      --fersken: #f6b98a;
+      --fersken-lys: #fee8d6;
+      --salvie: #b5cea3;
+      --salvie-lys: #e4eeda;
+      --salvie-mork: #5f7d4f;
+      --mynte: #bfe3df;
+      --mynte-lys: #e4f4f1;
+      --rosa: #f7cdc6;
+      --rosa-lys: #fdece8;
+      --rosa-mork: #b4473a;
+      --lavendel: #d6d0ef;
+      --lavendel-lys: #f0edfa;
+      --mork: #2a2a2a;
+
+      --bakgrunn: #fffaf0;
+      --kort: #ffffff;
+      --kant: #ecdfc4;
+      --tekst: #2a2a2a;
+      --tekst-dempet: #6f675a;
+      --radius: 14px;
+
+      --lilla: var(--mork);
+      --svart: var(--tekst);
+      --flate: var(--sol-lys);
     }
-    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      color: var(--svart);
+      font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--tekst);
+      line-height: 1.55;
       background: var(--bakgrunn);
-      line-height: 1.5;
     }
-    .toppmeny {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem 1.25rem;
-      padding: 0.75rem 1.5rem;
-      border-bottom: 1px solid var(--kant);
+
+    a { color: inherit; text-decoration-color: var(--sol); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    a:hover { text-decoration-color: var(--salvie-mork); }
+    h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 1.5rem; }
+    h1::after {
+      content: ""; display: block; width: 72px; height: 6px; margin-top: 0.5rem; border-radius: 3px;
+      background: linear-gradient(90deg, var(--sol) 0 25%, var(--mynte) 25% 50%, var(--rosa) 50% 75%, var(--lavendel) 75% 100%);
     }
-    .toppmeny a { color: var(--svart); text-decoration: none; }
-    .toppmeny a:hover { color: var(--lilla); }
-    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    h2 { font-size: 1.25rem; font-weight: 700; margin: 0 0 1rem; }
+
+    /* ---------- Toppmeny ---------- */
+    .topp { background: var(--kort); border-bottom: 1px solid var(--kant); }
+    .mosaikk {
+      height: 8px;
+      background:
+        linear-gradient(90deg, var(--sol) 0 14%, var(--salvie) 14% 27%, var(--rosa) 27% 41%,
+          var(--mynte) 41% 55%, var(--fersken) 55% 68%, var(--lavendel) 68% 82%, var(--salvie-lys) 82% 100%)
+        0 0 / 260px 4px repeat-x,
+        linear-gradient(90deg, var(--mynte) 0 11%, var(--sol) 11% 26%, var(--fersken) 26% 39%,
+          var(--lavendel) 39% 53%, var(--rosa) 53% 70%, var(--salvie) 70% 84%, var(--mynte) 84% 100%)
+        37px 4px / 260px 4px repeat-x;
+    }
+    .meny {
+      max-width: 1100px; margin: 0 auto; padding: 0.75rem 1.5rem;
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; font-weight: 700; }
+    .logo-sirkel {
+      width: 40px; height: 40px; border-radius: 50%; background: var(--mork); color: var(--sol);
+      display: grid; place-items: center; font-size: 0.75rem; letter-spacing: 0.04em;
+    }
+    .lenker { display: flex; gap: 0.25rem; flex-wrap: wrap; margin-left: auto; }
+    .lenker a {
+      text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 999px;
+      font-weight: 500; transition: background 0.15s;
+    }
+    .lenker a:nth-child(7n+1):hover { background: var(--sol-lys); }
+    .lenker a:nth-child(7n+2):hover { background: var(--rosa-lys); }
+    .lenker a:nth-child(7n+3):hover { background: var(--mynte-lys); }
+    .lenker a:nth-child(7n+4):hover { background: var(--fersken-lys); }
+    .lenker a:nth-child(7n+5):hover { background: var(--salvie-lys); }
+    .lenker a:nth-child(7n+6):hover { background: var(--lavendel-lys); }
+    .lenker a:nth-child(7n+7):hover { background: var(--rosa-lys); }
+    .lenker a[aria-current="page"] { background: var(--salvie); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    /* ---------- Seksjoner ---------- */
+    .seksjon, .admin-seksjon, .profil-seksjon { margin-bottom: 2.5rem; }
+    .seksjon-topp {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .seksjon-topp h1, .seksjon-topp h2 { margin: 0; }
+    .forklaring, .undertittel { margin: 0.25rem 0 1rem; color: var(--tekst-dempet); }
+
+    /* Hver seksjon på en side får sin egen farge */
+    section:nth-of-type(4n+1) { --seksjonsfarge: var(--sol); }
+    section:nth-of-type(4n+2) { --seksjonsfarge: var(--mynte); }
+    section:nth-of-type(4n+3) { --seksjonsfarge: var(--rosa); }
+    section:nth-of-type(4n+4) { --seksjonsfarge: var(--lavendel); }
+    section h2::before {
+      content: ""; display: inline-block; width: 0.7em; height: 0.7em;
+      border-radius: 50%; margin-right: 0.5rem; vertical-align: 0.05em;
+      background: var(--seksjonsfarge, var(--sol));
+    }
+
+    /* ---------- Tabeller ---------- */
+    .tabell-ramme {
+      overflow-x: auto; background: var(--kort);
+      border: 1px solid var(--kant); border-top: 4px solid var(--mynte);
+      border-radius: var(--radius);
+    }
+    section .tabell-ramme { border-top-color: var(--seksjonsfarge, var(--mynte)); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--kant); }
+    th { background: var(--mynte-lys); font-weight: 600; font-size: 0.9rem; }
+    tbody tr:hover { background: var(--fersken-lys); }
+    tr:last-child td { border-bottom: none; }
+    .tomt { padding: 2rem; text-align: center; color: var(--tekst-dempet); }
+
+    /* ---------- Knapper ---------- */
+    .handlinger { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .knapp {
+      display: inline-block; padding: 0.45rem 0.95rem; border-radius: 999px;
+      border: 1px solid var(--kant); background: var(--kort); color: var(--tekst);
+      font: inherit; font-weight: 500; text-decoration: none; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .knapp:hover { background: var(--lavendel-lys); border-color: var(--lavendel); }
+    .knapp-hoved { background: var(--mork); border-color: var(--mork); color: var(--bakgrunn); }
+    .knapp-hoved:hover { background: var(--salvie-mork); border-color: var(--salvie-mork); }
+    .knapp-fare { color: var(--rosa-mork); }
+    .knapp-fare:hover { background: var(--rosa-lys); border-color: var(--rosa); }
+    .knapp:focus-visible, a:focus-visible { outline: 3px solid var(--sol); outline-offset: 2px; }
+
+    /* ---------- Statusmerker ---------- */
+    .status {
+      display: inline-block; padding: 0.15rem 0.65rem; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 500;
+      background: var(--rosa-lys); color: var(--rosa-mork);
+    }
+    .status-aktiv { background: var(--salvie-lys); color: var(--salvie-mork); }
+
+    /* ---------- Profil ---------- */
+    .profil-topp {
+      display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;
+      background: linear-gradient(135deg, var(--kort) 55%, var(--fersken-lys));
+      border: 1px solid var(--kant); border-radius: var(--radius);
+      padding: 1.5rem; margin-bottom: 2.5rem;
+    }
+    .profil-bilde { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 4px solid var(--sol); }
+    .profil-hode { flex: 1; min-width: 220px; }
+    .profil-hode h1 { margin: 0; }
+    .opplysninger { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.25rem; margin: 0; }
+    .opplysninger dt { color: var(--tekst-dempet); }
+    .opplysninger dd { margin: 0; }
+
+    /* ---------- Statistikk ---------- */
+    .nokkeltall { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .kort { background: var(--kort); border: 1px solid var(--kant); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+    .nokkeltall .kort:nth-child(4n+1) { background: var(--sol-lys); border-color: var(--sol); }
+    .nokkeltall .kort:nth-child(4n+2) { background: var(--mynte-lys); border-color: var(--mynte); }
+    .nokkeltall .kort:nth-child(4n+3) { background: var(--rosa-lys); border-color: var(--rosa); }
+    .nokkeltall .kort:nth-child(4n+4) { background: var(--lavendel-lys); border-color: var(--lavendel); }
+    .kort .tall { font-size: 2.5rem; font-weight: 700; line-height: 1.1; }
+    .kort .etikett { color: var(--tekst-dempet); }
   </style>
 </head>
 <body>
-  <nav class="toppmeny">
-    <a href="/">Dashboard</a>
-    <a href="/min-profil">Min profil</a>
-    <a href="/statistikk">Statistikk</a>
-    <a href="/kurs">Kurs</a>
-    <a href="/grupper">Grupper</a>
-    <a href="/godkjenning">Godkjenning</a>
-    <a href="/admin">Admin</a>
-  </nav>
+  {% set sti = request.url.path %}
+  {% macro menylenke(href, tekst) %}
+    <a href="{{ href }}"{% if sti == href or (href != "/" and sti.startswith(href)) %} aria-current="page"{% endif %}>{{ tekst }}</a>
+  {% endmacro %}
+
+  <header class="topp">
+    <div class="mosaikk" aria-hidden="true"></div>
+    <nav class="meny" aria-label="Hovedmeny">
+      <a class="logo" href="/">
+        <span class="logo-sirkel">SRiB</span>
+        Personaldatabase
+      </a>
+      <div class="lenker">
+        {{ menylenke("/", "Dashboard") }}
+        {{ menylenke("/min-profil", "Min profil") }}
+        {{ menylenke("/statistikk", "Statistikk") }}
+        {{ menylenke("/kurs", "Kurs") }}
+        {{ menylenke("/grupper", "Grupper") }}
+        {{ menylenke("/godkjenning", "Godkjenning") }}
+        {{ menylenke("/admin", "Admin") }}
+      </div>
+    </nav>
+  </header>
+
   <main>
     {% block innhold %}{% endblock %}
   </main>
 </body>
-</html> 
+</html>

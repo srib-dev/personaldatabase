@@ -5,19 +5,6 @@
 {% macro desimal(tall) %}{{ ("%.1f" | format(tall)) | replace(".", ",") if tall is not none else "–" }}{% endmacro %}
 
 {% block innhold %}
-<style>
-  .nokkeltall { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
-  .kort { border: 1px solid var(--kant); border-radius: 6px; padding: 1rem 1.25rem; }
-  .kort .tall { font-size: 2rem; font-weight: 600; line-height: 1.2; }
-  .kort .etikett { color: var(--tekst-dempet); }
-  h2 { font-size: 1.25rem; margin: 0 0 1rem; }
-  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
-  th { background: var(--flate); font-weight: 600; }
-  tr:last-child td { border-bottom: none; }
-  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
-</style>
 
 <h1>Statistikk</h1>
 
