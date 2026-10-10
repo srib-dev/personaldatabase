@@ -13,7 +13,13 @@ from personaldatabase.models import (
     PersonModel,
     PersonVervModel,
 )
-
+from personaldatabase.models import (
+    GroupModel,
+    PersonCourseModel,
+    PersonGroupModel,
+    PersonModel,
+    PersonVervModel,
+)
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 router = APIRouter()
@@ -113,9 +119,10 @@ def godkjenning(request: Request):
 
 
 @router.get("/admin")
-def admin(request: Request):
+def admin(request: Request, db: Session = Depends(get_db)):
+    grupper = db.scalars(select(GroupModel).order_by(GroupModel.group_name)).all()
     return templates.TemplateResponse(request, "admin/index.html", {
         "er_superadmin": True,
         "admin_brukere": [],
-        "grupper": [],
+        "grupper": grupper,
     })

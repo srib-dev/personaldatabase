@@ -81,9 +81,9 @@
   <div class="seksjon-topp">
     <div>
       <h2 id="grupper-tittel">Grupper</h2>
-      <p class="forklaring">Opprett, rediger og arkiver grupper, og legg grupper på is eller start dem opp igjen.</p>
+      <p class="forklaring">Opprett, rediger og arkiver grupper.</p>
     </div>
-    {# TODO: koble til når backend har endepunkt for å opprette gruppe #}
+    {# TODO: koble til når backend har POST /groups/ #}
     <button class="knapp knapp-hoved" type="button">Ny gruppe</button>
   </div>
 
@@ -92,34 +92,25 @@
       <thead>
         <tr>
           <th scope="col">Navn</th>
-          <th scope="col">Status</th>
+          <th scope="col">Opprettet</th>
           <th scope="col">Handlinger</th>
         </tr>
       </thead>
       <tbody>
         {% for gruppe in grupper %}
         <tr>
-          <td><a href="/grupper/{{ gruppe.id }}">{{ gruppe.navn }}</a></td>
-          <td>
-            {% if gruppe.aktiv %}
-              <span class="status status-aktiv">Aktiv</span>
-            {% else %}
-              <span class="status">På is</span>
-            {% endif %}
-          </td>
+          <td><a href="/grupper/{{ gruppe.id }}">{{ gruppe.group_name }}</a></td>
+          <td>{{ gruppe.group_created_date.strftime("%d.%m.%Y") if gruppe.group_created_date else "–" }}</td>
           <td>
             <div class="handlinger">
-              {# TODO: koble til når endepunktene for å endre gruppe finnes #}
-              <button class="knapp" type="button">Rediger</button>
-              <button class="knapp" type="button">
-                {% if gruppe.aktiv %}Legg på is{% else %}Start opp igjen{% endif %}
-              </button>
+              <a class="knapp" href="/grupper/{{ gruppe.id }}">Rediger</a>
+              {# TODO: koble til når backend har endepunkt for å arkivere gruppe #}
               <button class="knapp knapp-fare" type="button">Arkiver</button>
             </div>
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="3" class="tomt">Ingen grupper ennå. Opprett den første med «Ny gruppe».</td></tr>
+        <tr><td colspan="3" class="tomt">Ingen grupper ennå.</td></tr>
         {% endfor %}
       </tbody>
     </table>
