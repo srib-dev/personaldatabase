@@ -1,8 +1,167 @@
 {% extends "base.html" %}
 
-{% block tittel %}Profil{% endblock %}
+{% block tittel %}{{ person.first_name }} {{ person.last_name }}{% endblock %}
 
 {% block innhold %}
-<h1>Profil</h1>
-<p>Verv, grupper, kurs og medarbeideravtale.</p>
+<style>
+  .profil-topp {
+    display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .profil-bilde {
+    width: 120px; height: 120px; object-fit: cover;
+    border-radius: 6px; border: 1px solid var(--kant); background: var(--flate);
+  }
+  .profil-hode { flex: 1; min-width: 220px; }
+  .profil-hode h1 { margin: 0 0 0.25rem; }
+  .profil-hode .undertittel { margin: 0 0 1rem; color: var(--tekst-dempet); }
+  .opplysninger { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; margin: 0; }
+  .opplysninger dt { color: var(--tekst-dempet); }
+  .opplysninger dd { margin: 0; }
+  .profil-seksjon { margin-bottom: 2.5rem; }
+  .profil-seksjon h2 { margin: 0 0 1rem; font-size: 1.25rem; }
+  .seksjon-topp {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .seksjon-topp h2 { margin: 0; }
+  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
+  th { background: var(--flate); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .knapp {
+    padding: 0.4rem 0.8rem; border: 1px solid var(--kant); border-radius: 4px;
+    background: var(--bakgrunn); color: inherit; font: inherit; cursor: pointer;
+  }
+  .knapp-hoved { background: var(--lilla); border-color: var(--lilla); color: #fff; }
+  .knapp:focus-visible { outline: 2px solid var(--lilla); outline-offset: 2px; }
+  .status { padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.875rem; background: var(--flate); }
+  .status-aktiv { background: #e6f4ea; }
+  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
+</style>
+
+{# ---------- Personopplysninger ---------- #}
+<section class="profil-topp" aria-labelledby="profil-navn">
+  {% if person.picture %}
+    <img class="profil-bilde" src="{{ person.picture }}" alt="Bilde av {{ person.first_name }} {{ person.last_name }}">
+  {% endif %}
+  <div class="profil-hode">
+    <div class="seksjon-topp">
+      <div>
+        <h1 id="profil-navn">{{ person.first_name }} {{ person.last_name }}</h1>
+        <p class="undertittel">
+          {{ person.school }} ·
+          {% if person.is_active %}
+            <span class="status status-aktiv">Aktiv</span>
+          {% else %}
+            <span class="status">Inaktiv</span>
+          {% endif %}
+        </p>
+      </div>
+      {% if kan_redigere %}
+        {# TODO: koble til når backend har endepunkt for å redigere person #}
+        <button class="knapp knapp-hoved" type="button">Rediger profil</button>
+      {% endif %}
+    </div>
+    <dl class="opplysninger">
+      <dt>E-post</dt><dd>{{ person.email }}</dd>
+      <dt>Telefon</dt><dd>{{ person.phone_number }}</dd>
+      <dt>Adresse</dt><dd>{{ person.street_name }}, {{ person.postbox }}</dd>
+      <dt>Fødselsdato</dt><dd>{{ person.birthdate.strftime("%d.%m.%Y") }}</dd>
+      <dt>Kjønn</dt><dd>{{ person.gender }}</dd>
+      <dt>Studentkort</dt><dd>{{ person.student_card_number }}</dd>
+    </dl>
+  </div>
+</section>
+
+{# ---------- Medarbeideravtale ---------- #}
+<section class="profil-seksjon" aria-labelledby="avtale-tittel">
+  <h2 id="avtale-tittel">Medarbeideravtale</h2>
+  <dl class="opplysninger">
+    <dt>Sist signert</dt><dd>{{ person.last_signed_contract.strftime("%d.%m.%Y") }}</dd>
+  </dl>
+</section>
+
+{# ---------- Verv ---------- #}
+<section class="profil-seksjon" aria-labelledby="verv-tittel">
+  <div class="seksjon-topp">
+    <h2 id="verv-tittel">Verv</h2>
+    {% if kan_redigere %}
+      {# TODO: koble til når backend har endepunkt for å gi en person verv #}
+      <button class="knapp" type="button">Legg til verv</button>
+    {% endif %}
+  </div>
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr><th scope="col">Verv</th><th scope="col">Rolle</th></tr>
+      </thead>
+      <tbody>
+        {% for pv in person.verv %}
+        <tr><td>{{ pv.verv.verv_name }}</td><td>{{ pv.verv.role }}</td></tr>
+        {% else %}
+        <tr><td colspan="2" class="tomt">Ingen verv.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{# ---------- Grupper ---------- #}
+<section class="profil-seksjon" aria-labelledby="grupper-tittel">
+  <div class="seksjon-topp">
+    <h2 id="grupper-tittel">Grupper</h2>
+    {% if kan_redigere %}
+      {# TODO: koble til når backend har endepunkt for å melde en person inn i en gruppe #}
+      <button class="knapp" type="button">Legg til i gruppe</button>
+    {% endif %}
+  </div>
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr><th scope="col">Gruppe</th><th scope="col">Medlem siden</th></tr>
+      </thead>
+      <tbody>
+        {% for pg in person.groups %}
+        <tr>
+          <td><a href="/grupper/{{ pg.group.id }}">{{ pg.group.group_name }}</a></td>
+          <td>{{ pg.when_joined_group.strftime("%d.%m.%Y") }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="2" class="tomt">Ikke med i noen grupper.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{# ---------- Kurs ---------- #}
+<section class="profil-seksjon" aria-labelledby="kurs-tittel">
+  <div class="seksjon-topp">
+    <h2 id="kurs-tittel">Kurs</h2>
+    {% if kan_redigere %}
+      {# TODO: koble til når backend har endepunkt for å registrere kurs på en person #}
+      <button class="knapp" type="button">Registrer kurs</button>
+    {% endif %}
+  </div>
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr><th scope="col">Kurs</th><th scope="col">Arrangør</th><th scope="col">Dato</th></tr>
+      </thead>
+      <tbody>
+        {% for pc in person.courses %}
+        <tr>
+          <td>{{ pc.course.course_name }}</td>
+          <td>{{ pc.course.course_provider }}</td>
+          <td>{{ pc.course_date.strftime("%d.%m.%Y") }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="tomt">Ingen kurs registrert.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
