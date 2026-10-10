@@ -20,6 +20,9 @@ from personaldatabase.models import (
     PersonModel,
     PersonVervModel,
 )
+from sqlalchemy import func, select
+from datetime import date
+
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 router = APIRouter()
@@ -48,6 +51,14 @@ def vis_person(request: Request, db: Session, id: int, kan_redigere: bool):
         "kan_redigere": kan_redigere,
     })
 
+def alder(fodselsdato: date) -> int:
+    i_dag = date.today()
+    har_hatt_bursdag = (i_dag.month, i_dag.day) >= (fodselsdato.month, fodselsdato.day)
+    return i_dag.year - fodselsdato.year - (0 if har_hatt_bursdag else 1)
+
+
+def snitt(tall: list[int]) -> float | None:
+    return round(sum(tall) / len(tall), 1) if tall else None
 
 @router.get("/")
 def dashboard(request: Request, db: Session = Depends(get_db)):
@@ -77,8 +88,30 @@ def slett_person(id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/statistikk")
-def statistikk(request: Request):
-    return templates.TemplateResponse(request, "statistikk/index.html")
+def statistikk(request: Request, db: Session = Depends(get_db)):
+    personer = db.scalars(
+        select(PersonModel).options(
+            selectinload(PersonModel.groups).selectinload(PersonGroupModel.group)
+        )
+    ).all()
+    aktive = [p for p in personer if p.is_active]
+
+    per_gruppe = []
+    for gruppe in db.scalars(select(GroupModel).order_by(GroupModel.group_name)).all():
+        medlemmer = [p for p in aktive if any(pg.group.id == gruppe.id for pg in p.groups)]
+        per_gruppe.append({
+            "id": gruppe.id,
+            "navn": gruppe.group_name,
+            "antall": len(medlemmer),
+            "snittalder": snitt([alder(p.birthdate) for p in medlemmer if p.birthdate]),
+        })
+
+    return templates.TemplateResponse(request, "statistikk/index.html", {
+        "antall_aktive": len(aktive),
+        "antall_totalt": len(personer),
+        "snittalder": snitt([alder(p.birthdate) for p in aktive if p.birthdate]),
+        "per_gruppe": per_gruppe,
+    })
 
 
 @router.get("/min-profil")
@@ -99,13 +132,36 @@ def vis_profil(request: Request, id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/grupper")
-def grupper(request: Request):
-    return templates.TemplateResponse(request, "grupper/liste.html")
+def grupper(request: Request, db: Session = Depends(get_db)):
+    grupper = db.scalars(select(GroupModel).order_by(GroupModel.group_name)).all()
+    antall = dict(db.execute(
+        select(GroupModel.id, func.count())
+        .select_from(PersonGroupModel)
+        .join(PersonGroupModel.group)
+        .group_by(GroupModel.id)
+    ).all())
+    return templates.TemplateResponse(request, "grupper/liste.html", {
+        "grupper": grupper,
+        "antall": antall,
+    })
 
 
 @router.get("/grupper/{id}")
-def vis_gruppe(request: Request, id: int):
-    return templates.TemplateResponse(request, "grupper/vis.html")
+def vis_gruppe(request: Request, id: int, db: Session = Depends(get_db)):
+    gruppe = db.get(GroupModel, id)
+    if not gruppe:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    medlemmer = db.execute(
+        select(PersonModel, PersonGroupModel)
+        .join(PersonModel.groups)
+        .join(PersonGroupModel.group)
+        .where(GroupModel.id == id)
+        .order_by(PersonModel.last_name)
+    ).all()
+    return templates.TemplateResponse(request, "grupper/vis.html", {
+        "gruppe": gruppe,
+        "medlemmer": medlemmer,
+    })
 
 
 @router.get("/kurs")

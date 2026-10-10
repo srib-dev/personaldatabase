@@ -2,7 +2,59 @@
 
 {% block tittel %}Statistikk{% endblock %}
 
+{% macro desimal(tall) %}{{ ("%.1f" | format(tall)) | replace(".", ",") if tall is not none else "–" }}{% endmacro %}
+
 {% block innhold %}
+<style>
+  .nokkeltall { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+  .kort { border: 1px solid var(--kant); border-radius: 6px; padding: 1rem 1.25rem; }
+  .kort .tall { font-size: 2rem; font-weight: 600; line-height: 1.2; }
+  .kort .etikett { color: var(--tekst-dempet); }
+  h2 { font-size: 1.25rem; margin: 0 0 1rem; }
+  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
+  th { background: var(--flate); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
+</style>
+
 <h1>Statistikk</h1>
-<p>Gjennomsnittsalder og antall medlemmer.</p>
+
+<div class="nokkeltall">
+  <div class="kort">
+    <div class="tall">{{ antall_aktive }}</div>
+    <div class="etikett">aktive medlemmer ({{ antall_totalt }} totalt)</div>
+  </div>
+  <div class="kort">
+    <div class="tall">{{ desimal(snittalder) }}</div>
+    <div class="etikett">års gjennomsnittsalder</div>
+  </div>
+</div>
+
+<section aria-labelledby="per-gruppe-tittel">
+  <h2 id="per-gruppe-tittel">Per gruppe</h2>
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Gruppe</th>
+          <th scope="col">Aktive medlemmer</th>
+          <th scope="col">Gjennomsnittsalder</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in per_gruppe %}
+        <tr>
+          <td><a href="/grupper/{{ g.id }}">{{ g.navn }}</a></td>
+          <td>{{ g.antall }}</td>
+          <td>{{ desimal(g.snittalder) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="tomt">Ingen grupper ennå.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

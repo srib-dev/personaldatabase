@@ -1,8 +1,68 @@
 {% extends "base.html" %}
 
-{% block tittel %}Gruppe{% endblock %}
+{% block tittel %}{{ gruppe.group_name }}{% endblock %}
 
 {% block innhold %}
-<h1>Gruppe</h1>
-<p>Informasjon om én gruppe.</p>
+<style>
+  .seksjon-topp {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .seksjon-topp h2 { margin: 0; font-size: 1.25rem; }
+  .undertittel { margin: 0 0 2rem; color: var(--tekst-dempet); }
+  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
+  th { background: var(--flate); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .knapp {
+    padding: 0.4rem 0.8rem; border: 1px solid var(--kant); border-radius: 4px;
+    background: var(--bakgrunn); color: inherit; font: inherit; cursor: pointer;
+  }
+  .status { padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.875rem; background: var(--flate); }
+  .status-aktiv { background: #e6f4ea; }
+  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
+</style>
+
+<p><a href="/grupper">← Alle grupper</a></p>
+<h1>{{ gruppe.group_name }}</h1>
+<p class="undertittel">Opprettet {{ gruppe.group_created_date or "–" }} · {{ medlemmer | length }} medlemmer</p>
+
+<section aria-labelledby="medlemmer-tittel">
+  <div class="seksjon-topp">
+    <h2 id="medlemmer-tittel">Medlemmer</h2>
+    {# TODO: koble til når backend har endepunkt for å melde en person inn i en gruppe #}
+    <button class="knapp" type="button">Legg til medlem</button>
+  </div>
+  <div class="tabell-ramme">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Navn</th>
+          <th scope="col">E-post</th>
+          <th scope="col">Medlem siden</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person, medlemskap in medlemmer %}
+        <tr>
+          <td><a href="/profil/{{ person.id }}">{{ person.first_name }} {{ person.last_name }}</a></td>
+          <td>{{ person.email }}</td>
+          <td>{{ medlemskap.when_joined_group or "–" }}</td>
+          <td>
+            {% if person.is_active %}
+              <span class="status status-aktiv">Aktiv</span>
+            {% else %}
+              <span class="status">Inaktiv</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="tomt">Ingen medlemmer i denne gruppen ennå.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

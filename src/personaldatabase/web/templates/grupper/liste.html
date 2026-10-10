@@ -3,6 +3,37 @@
 {% block tittel %}Grupper{% endblock %}
 
 {% block innhold %}
+<style>
+  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
+  th { background: var(--flate); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
+</style>
+
 <h1>Grupper</h1>
-<p>Oversikt over gruppene.</p>
+
+<div class="tabell-ramme">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Gruppe</th>
+        <th scope="col">Medlemmer</th>
+        <th scope="col">Opprettet</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for gruppe in grupper %}
+      <tr>
+        <td><a href="/grupper/{{ gruppe.id }}">{{ gruppe.group_name }}</a></td>
+        <td>{{ antall.get(gruppe.id, 0) }}</td>
+        <td>{{ gruppe.group_created_date or "–" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="tomt">Ingen grupper ennå.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
