@@ -1,0 +1,28 @@
+<tr>
+  <td><a href="/profil/{{ p.id }}">{{ p.first_name }} {{ p.last_name }}</a></td>
+  <td>{{ p.email }}</td>
+  <td>{{ p.school }}</td>
+  <td>{{ p.last_signed_contract.strftime("%d.%m.%Y") if p.last_signed_contract else "–" }}</td>
+  <td>
+    {% if p.is_active %}
+      <span class="status status-aktiv">Aktiv</span>
+    {% else %}
+      <span class="status">Inaktiv</span>
+    {% endif %}
+  </td>
+  <td>
+    <div class="handlinger">
+      <button class="knapp" type="button"
+              hx-patch="/personal/{{ p.id }}/aktiv"
+              hx-target="closest tr" hx-swap="outerHTML">
+        {% if p.is_active %}Sett inaktiv{% else %}Sett aktiv{% endif %}
+      </button>
+      <button class="knapp knapp-fare" type="button"
+              hx-delete="/personal/{{ p.id }}"
+              hx-target="closest tr" hx-swap="outerHTML"
+              hx-confirm="Slette {{ p.first_name }} {{ p.last_name }}? Dette kan ikke angres.">
+        Slett
+      </button>
+    </div>
+  </td>
+</tr>

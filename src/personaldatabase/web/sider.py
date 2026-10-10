@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -18,7 +19,7 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 router = APIRouter()
 
 # TODO: erstatt med innlogget bruker når innlogging er på plass
-INNLOGGET_PERSON_ID = 1
+INNLOGGET_PERSON_ID = 2
 
 
 def vis_person(request: Request, db: Session, id: int, kan_redigere: bool):
@@ -43,8 +44,30 @@ def vis_person(request: Request, db: Session, id: int, kan_redigere: bool):
 
 
 @router.get("/")
-def dashboard(request: Request):
-    return templates.TemplateResponse(request, "dashboard/index.html")
+def dashboard(request: Request, db: Session = Depends(get_db)):
+    personer = db.scalars(select(PersonModel).order_by(PersonModel.last_name)).all()
+    return templates.TemplateResponse(request, "dashboard/index.html", {"personer": personer})
+
+
+@router.patch("/personal/{id}/aktiv")
+def bytt_aktiv(request: Request, id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    person.is_active = not person.is_active
+    db.commit()
+    db.refresh(person)
+    return templates.TemplateResponse(request, "dashboard/_rad.html", {"p": person})
+
+
+@router.delete("/personal/{id}")
+def slett_person(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    db.delete(person)
+    db.commit()
+    return HTMLResponse("")
 
 
 @router.get("/statistikk")
