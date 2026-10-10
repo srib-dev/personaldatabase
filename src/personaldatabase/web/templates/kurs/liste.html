@@ -3,6 +3,61 @@
 {% block tittel %}Kurs{% endblock %}
 
 {% block innhold %}
-<h1>Kurs</h1>
-<p>Opprette, lese, redigere og slette kurs.</p>
+<style>
+  .seksjon-topp {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .seksjon-topp h1 { margin: 0; }
+  .tabell-ramme { overflow-x: auto; border: 1px solid var(--kant); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--kant); }
+  th { background: var(--flate); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .handlinger { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .knapp {
+    padding: 0.4rem 0.8rem; border: 1px solid var(--kant); border-radius: 4px;
+    background: var(--bakgrunn); color: inherit; font: inherit; cursor: pointer;
+  }
+  .knapp-hoved { background: var(--lilla); border-color: var(--lilla); color: #fff; }
+  .knapp-fare { color: #b42318; }
+  .tomt { padding: 1.5rem; text-align: center; color: var(--tekst-dempet); }
+</style>
+
+<div class="seksjon-topp">
+  <h1>Kurs</h1>
+  {# TODO: koble til når backend har POST /courses/ #}
+  <button class="knapp knapp-hoved" type="button">Nytt kurs</button>
+</div>
+
+<div class="tabell-ramme">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Kurs</th>
+        <th scope="col">Arrangør</th>
+        <th scope="col">Antall som har tatt det</th>
+        <th scope="col">Handlinger</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for k in alle_kurs %}
+      <tr>
+        <td>{{ k.course_name }}</td>
+        <td>{{ k.course_provider }}</td>
+        <td>{{ antall.get(k.id, 0) }}</td>
+        <td>
+          <div class="handlinger">
+            {# TODO: koble til når backend har endepunkter for å redigere og slette kurs #}
+            <button class="knapp" type="button">Rediger</button>
+            <button class="knapp knapp-fare" type="button">Slett</button>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="tomt">Ingen kurs registrert ennå.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

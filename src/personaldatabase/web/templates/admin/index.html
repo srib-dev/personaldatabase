@@ -34,14 +34,10 @@
 {# ---------- Admin-brukere: bare for super-administratorer ---------- #}
 {% if er_superadmin %}
 <section class="admin-seksjon" aria-labelledby="admin-brukere-tittel">
-  <div class="seksjon-topp">
-    <div>
-      <h2 id="admin-brukere-tittel">Admin-brukere</h2>
-      <p class="forklaring">Opprett, rediger og slett administratorer og gruppeadministratorer.</p>
-    </div>
-    {# TODO: koble til når backend har endepunkt for å opprette admin-bruker #}
-    <button class="knapp knapp-hoved" type="button">Ny admin-bruker</button>
-  </div>
+  <h2 id="admin-brukere-tittel">Super-administratorer</h2>
+  <p class="forklaring">
+    Admin-rettigheter følger av vervet. For å gi eller fjerne tilgang, endre vervet på personens profilside.
+  </p>
 
   <div class="tabell-ramme">
     <table>
@@ -49,26 +45,18 @@
         <tr>
           <th scope="col">Navn</th>
           <th scope="col">E-post</th>
-          <th scope="col">Rolle</th>
-          <th scope="col">Handlinger</th>
+          <th scope="col">Verv</th>
         </tr>
       </thead>
       <tbody>
-        {% for bruker in admin_brukere %}
+        {% for person, verv in admin_brukere %}
         <tr>
-          <td>{{ bruker.navn }}</td>
-          <td>{{ bruker.epost }}</td>
-          <td>{{ bruker.rolle }}</td>
-          <td>
-            <div class="handlinger">
-              {# TODO: koble til redigering og sletting når endepunktene finnes #}
-              <button class="knapp" type="button">Rediger</button>
-              <button class="knapp knapp-fare" type="button">Slett</button>
-            </div>
-          </td>
+          <td><a href="/profil/{{ person.id }}">{{ person.first_name }} {{ person.last_name }}</a></td>
+          <td>{{ person.email }}</td>
+          <td>{{ verv.role }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="4" class="tomt">Ingen admin-brukere ennå.</td></tr>
+        <tr><td colspan="3" class="tomt">Ingen har et verv som gir admin-rettigheter.</td></tr>
         {% endfor %}
       </tbody>
     </table>

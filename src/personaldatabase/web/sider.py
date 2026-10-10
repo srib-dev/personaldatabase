@@ -1,24 +1,21 @@
+from datetime import date
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from personaldatabase.database.session import get_db
 from personaldatabase.models import (
-    PersonCourseModel,
-    PersonGroupModel,
-    PersonModel,
-    PersonVervModel,
-)
-from personaldatabase.models import (
+    CourseModel,
     GroupModel,
     PersonCourseModel,
     PersonGroupModel,
     PersonModel,
     PersonVervModel,
+    VervModel,
 )
 from sqlalchemy import func, select
 from datetime import date
@@ -30,6 +27,13 @@ router = APIRouter()
 # TODO: erstatt med innlogget bruker når innlogging er på plass
 INNLOGGET_PERSON_ID = 2
 
+SUPERADMIN_ROLLER = [
+    "Daglig leder",
+    "Styreleder",
+    "Styrenestleder",
+    "Ansvarlig redaktør",
+    "Tillitsvalgt",
+]
 
 def vis_person(request: Request, db: Session, id: int, kan_redigere: bool):
     person = db.scalar(
@@ -165,8 +169,18 @@ def vis_gruppe(request: Request, id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/kurs")
-def kurs(request: Request):
-    return templates.TemplateResponse(request, "kurs/liste.html")
+def kurs(request: Request, db: Session = Depends(get_db)):
+    alle_kurs = db.scalars(select(CourseModel).order_by(CourseModel.course_name)).all()
+    antall = dict(db.execute(
+        select(CourseModel.id, func.count())
+        .select_from(PersonCourseModel)
+        .join(PersonCourseModel.course)
+        .group_by(CourseModel.id)
+    ).all())
+    return templates.TemplateResponse(request, "kurs/liste.html", {
+        "alle_kurs": alle_kurs,
+        "antall": antall,
+    })
 
 
 @router.get("/godkjenning")
@@ -176,9 +190,16 @@ def godkjenning(request: Request):
 
 @router.get("/admin")
 def admin(request: Request, db: Session = Depends(get_db)):
+    admin_brukere = db.execute(
+        select(PersonModel, VervModel)
+        .join(PersonModel.verv)
+        .join(PersonVervModel.verv)
+        .where(VervModel.role.in_(SUPERADMIN_ROLLER))
+        .order_by(PersonModel.last_name)
+    ).all()
     grupper = db.scalars(select(GroupModel).order_by(GroupModel.group_name)).all()
     return templates.TemplateResponse(request, "admin/index.html", {
         "er_superadmin": True,
-        "admin_brukere": [],
+        "admin_brukere": admin_brukere,
         "grupper": grupper,
     })
