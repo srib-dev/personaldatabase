@@ -1,3 +1,7 @@
+from personaldatabase.schemas.filters import PersonFilterParams
+from typing import Annotated
+
+from personaldatabase.crud.person import get_filtered_persons
 from sqlalchemy.util.typing import Literal
 from fastapi import Body
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -110,23 +114,15 @@ def get_person(id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=list[person_response])
-def get_all_persons(
+def get_persons(
+    filters: Annotated[PersonFilterParams, Depends()],
     db: Session = Depends(get_db),
-    skip: int = Query(0, ge=0, description="Antall rader å hoppe over"),
-    limit: int = Query(50, ge=1, le=100, description="Maks antall rader (maks 100)"),
-    status: Literal["active", "inactive", "all"] = Query(
-        "active", description="Filtrer personer etter status ('active', 'inactive', 'all')"
-    ),
 ):
-    query = select(PersonModel)
-    if status == "active":
-        query = query.where(PersonModel.is_active.is_(True))
-    elif status == "inactive":
-        query = query.where(PersonModel.is_active.is_(False))
-
-    query = query.offset(skip).limit(limit)
-    return db.scalars(query).all()
-
+    """
+    Hent personer med valgfri filtrering på tekst, gruppe, verv, alder,
+    og dato for signert kontrakt.
+    """
+    return get_filtered_persons(db=db, filters=filters)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_person(id: int, db: Session = Depends(get_db)):
