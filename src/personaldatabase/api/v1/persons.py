@@ -4,8 +4,17 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, or_
 from personaldatabase.database.session import get_db
+from personaldatabase.models.course_model import CourseModel
+from personaldatabase.models.group_model import GroupModel
+from personaldatabase.models.person_course_model import PersonCourseModel
+from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_model import PersonModel
+from personaldatabase.models.person_verv_model import PersonVervModel
+from personaldatabase.models.verv_model import VervModel
+from personaldatabase.schemas.course import CourseResponse
+from personaldatabase.schemas.group import GroupResponse
 from personaldatabase.schemas.person import person_create, person_response, person_update
+from personaldatabase.schemas.verv import VervResponse
 
 
 router = APIRouter(prefix="/persons", tags=["Persons"])
@@ -33,7 +42,6 @@ def create_person(person_in: person_create, db: Session = Depends(get_db)):
     response_model=list[person_response],
     status_code=status.HTTP_201_CREATED,
 )
-@router.post("/bulk", status_code=status.HTTP_201_CREATED)
 def create_persons_bulk(
     persons_in: list[person_create] = Body(..., max_length=100),
     db: Session = Depends(get_db),
@@ -179,5 +187,68 @@ def update_person(
     db.commit()
     db.refresh(person)
     return person
+
+
+@router.get(
+    "/{id}/groups",
+    response_model=list[GroupResponse],
+    summary="Hent alle grupper for en spesifikk person",
+)
+def get_person_groups(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    stmt = (
+        select(GroupModel)
+        .join(PersonGroupModel, GroupModel.id == PersonGroupModel.group_id)
+        .where(PersonGroupModel.person_id == id)
+    )
+    return db.scalars(stmt).all()
+
+
+@router.get(
+    "/{id}/courses",
+    response_model=list[CourseResponse],
+    summary="Hent alle kurs for en spesifikk person",
+)
+def get_person_courses(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    stmt = (
+        select(CourseModel)
+        .join(PersonCourseModel, CourseModel.id == PersonCourseModel.course_id)
+        .where(PersonCourseModel.person_id == id)
+    )
+    return db.scalars(stmt).all()
+
+
+@router.get(
+    "/{id}/verv",
+    response_model=list[VervResponse],
+    summary="Hent alle verv for en spesifikk person",
+)
+def get_person_verv(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    stmt = (
+        select(VervModel)
+        .join(PersonVervModel, VervModel.id == PersonVervModel.verv_id)
+        .where(PersonVervModel.person_id == id)
+    )
+    return db.scalars(stmt).all()
 
 

@@ -1,3 +1,4 @@
+from personaldatabase.schemas.person import person_response
 from datetime import timezone
 from datetime import datetime
 from sqlalchemy import select, or_
@@ -100,7 +101,7 @@ def delete_group(id: int, db: Session = Depends(get_db)):
 
 #legge til person i gruppe
 @router.post(
-    "/{group_id}/{person_id}",
+    "/{group_id}/members/{person_id}",
     response_model=GroupMemberResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Legg til en person i en gruppe",
@@ -140,3 +141,49 @@ def add_person_to_group(
     db.commit()
     db.refresh(membership)
     return membership
+
+
+@router.get(
+    "/{group_id}/members",
+    response_model=list[person_response],
+    summary="Hent alle medlemmer i en spesifikk gruppe",
+)
+def get_group_members(
+    group_id: int,
+    db: Session = Depends(get_db),
+):
+    group = db.get(GroupModel, group_id)
+    if not group:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Gruppe med ID {group_id} ble ikke funnet",
+        )
+
+    # JOIN mellom Person og koblingstabellen PersonGroup
+    query = (
+        select(PersonModel)
+        .join(PersonGroupModel, PersonModel.id == PersonGroupModel.person_id)
+        .where(PersonGroupModel.group_id == group_id)
+    )
+
+    return db.scalars(query).all()
+
+
+@router.delete(
+    "/{group_id}/members/{person_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Fjern en person fra en gruppe",
+)
+def remove_person_from_group(
+    group_id: int,
+    person_id: int,
+    db: Session = Depends(get_db),
+):
+    membership = db.get(PersonGroupModel, (person_id, group_id))
+    if not membership:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Personen er ikke medlem av denne gruppen",
+        )
+    db.delete(membership)
+    db.commit()

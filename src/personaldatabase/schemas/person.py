@@ -22,7 +22,7 @@ class person_base(BaseModel):
     gender: str
     is_active: bool = True
 
-    #gjør email lowercase (hindrer duplikate personer)
+    # gjør email lowercase (hindrer duplikate personer)
     @field_validator("email")
     @classmethod
     def normalize_email(cls, v: str) -> str:
@@ -34,6 +34,8 @@ class person_create(person_base):
     pass
 
 # Skjema for å oppdatere person
+
+
 class person_update(BaseModel):
     email: str | None = None
     first_name: str | None = None
@@ -50,6 +52,8 @@ class person_update(BaseModel):
     gender: str | None = None
 
 # Filter for henting av data
+
+
 class person_response(person_base):
     id: int
 
