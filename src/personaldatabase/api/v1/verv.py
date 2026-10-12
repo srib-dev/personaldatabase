@@ -1,3 +1,4 @@
+from personaldatabase.api.deps import require_admin
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
@@ -10,7 +11,8 @@ from personaldatabase.schemas.person import person_response
 from personaldatabase.schemas.person_verv import VervMemberResponse
 from personaldatabase.schemas.verv import VervCreate, VervResponse
 
-router = APIRouter(prefix="/verv", tags=["Verv"])
+router = APIRouter(prefix="/verv", tags=["Verv"], dependencies=[Depends(require_admin)])
+#router = APIRouter(prefix="/verv", tags=["Verv"])
 
 
 @router.post(
