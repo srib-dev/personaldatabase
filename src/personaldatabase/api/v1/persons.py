@@ -15,6 +15,7 @@ from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_verv_model import PersonVervModel
 from personaldatabase.models.verv_model import VervModel
+from personaldatabase.core.security import get_password_hash
 from personaldatabase.schemas.course import CourseResponse
 from personaldatabase.schemas.group import GroupResponse
 from personaldatabase.schemas.person import person_create, person_response, person_update
@@ -35,7 +36,12 @@ def create_person(person_in: person_create, db: Session = Depends(get_db)):
             detail="En person med denne e-postadressen eksisterer allerede",
         )
 
-    db_person = PersonModel(**person_in.model_dump())
+    person_data = person_in.model_dump()
+    raw_password = person_data.pop("password", None)
+    if raw_password:
+        person_data["hashed_password"] = get_password_hash(raw_password)
+
+    db_person = PersonModel(**person_data)
     db.add(db_person)
     db.commit()
     db.refresh(db_person)
@@ -71,7 +77,14 @@ def create_persons_bulk(
             detail=f"Følgende e-poster eksisterer allerede: {', '.join(existing_emails)}",
         )
 
-    db_persons = [PersonModel(**p.model_dump()) for p in persons_in]
+    db_persons = []
+    for p in persons_in:
+        p_data = p.model_dump()
+        raw_password = p_data.pop("password", None)
+        if raw_password:
+            p_data["hashed_password"] = get_password_hash(raw_password)
+        db_persons.append(PersonModel(**p_data))
+
     db.add_all(db_persons)
     db.commit()
 
@@ -175,6 +188,11 @@ def update_person(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="En person med denne e-postadressen eksisterer allerede",
             )
+
+    if "password" in update_data:
+        raw_password = update_data.pop("password")
+        if raw_password:
+            update_data["hashed_password"] = get_password_hash(raw_password)
 
     # Oppdater feltene på modellen
     for field, value in update_data.items():

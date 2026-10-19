@@ -1,9 +1,11 @@
 from fastapi import FastAPI
+from personaldatabase.database.init_db import init_db
 from personaldatabase.database.session import Base, engine
 import personaldatabase.models
 from personaldatabase.api.v1 import api_router
 
 Base.metadata.create_all(bind=engine)
+init_db()
 
 
 app = FastAPI()
