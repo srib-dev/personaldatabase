@@ -104,6 +104,20 @@ def delete_program(id: int, db: Session = Depends(get_db)):
     db.delete(program)
     db.commit()
 
+@router.patch("/{id}/toggle-active", response_model=ProgramResponse)
+def toggle_program_active(id: int, db: Session = Depends(get_db)):
+    program = db.get(ProgramModel, id)
+    if not program:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Program med ID {id} ble ikke funnet",
+        )
+
+    program.is_active = not program.is_active
+    db.commit()
+    db.refresh(program)
+    return program
+
 
 # Legge til person i et program
 @router.post(
