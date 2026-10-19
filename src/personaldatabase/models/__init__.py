@@ -3,7 +3,9 @@ from personaldatabase.models.group_model import GroupModel
 from personaldatabase.models.person_course_model import PersonCourseModel
 from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_model import PersonModel
+from personaldatabase.models.person_program_model import PersonProgramModel
 from personaldatabase.models.person_verv_model import PersonVervModel
+from personaldatabase.models.program_model import ProgramModel
 from personaldatabase.models.verv_model import VervModel
 
 # For backward compatibility
@@ -21,7 +23,9 @@ __all__ = [
     "PersonCourseModel",
     "PersonGroupModel",
     "PersonModel",
+    "PersonProgramModel",
     "PersonVervModel",
+    "ProgramModel",
     "VervModel",
     "course_model",
     "group_model",

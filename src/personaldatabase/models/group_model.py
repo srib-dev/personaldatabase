@@ -6,6 +6,7 @@ from personaldatabase.database.session import Base
 
 if TYPE_CHECKING:
     from personaldatabase.models.person_group_model import PersonGroupModel
+    from personaldatabase.models.program_model import ProgramModel
 
 
 class GroupModel(Base):
@@ -17,4 +18,6 @@ class GroupModel(Base):
     group_created_date: Mapped[date] = mapped_column(Date, nullable=False)
 
     members: Mapped[list["PersonGroupModel"]] = relationship(
+        back_populates="group", cascade="all, delete-orphan")
+    programs: Mapped[list["ProgramModel"]] = relationship(
         back_populates="group", cascade="all, delete-orphan")
