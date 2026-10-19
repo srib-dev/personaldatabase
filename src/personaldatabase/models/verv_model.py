@@ -14,5 +14,7 @@ class VervModel(Base):
     verv_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     role: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    persons: Mapped[list["PersonVervModel"]] = relationship(back_populates="verv")
+    persons: Mapped[list["PersonVervModel"]] = relationship(
+        back_populates="verv", cascade="all, delete-orphan"
+    )
 

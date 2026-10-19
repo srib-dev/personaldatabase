@@ -14,7 +14,7 @@ class CourseModel(Base):
     course_name: Mapped[str] = mapped_column(String(100), nullable=False)
     course_provider: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    persons: Mapped[list["PersonCourseModel"]] = relationship(back_populates="course")
-
-
+    persons: Mapped[list["PersonCourseModel"]] = relationship(
+        back_populates="course", cascade="all, delete-orphan"
+    )
     

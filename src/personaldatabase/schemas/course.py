@@ -1,11 +1,21 @@
 from pydantic import BaseModel, ConfigDict
 
 
-# Filter for henting av data
+# Skjema for å opprette nytt kurs
+class CourseCreate(BaseModel):
+    course_name: str
+    course_provider: str
 
-class course_response(BaseModel):
+
+# Filter for henting av data
+class CourseResponse(BaseModel):
     id: int
     course_name: str
     course_provider: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Bakoverkompatibilitet
+course_response = CourseResponse
+course_create = CourseCreate

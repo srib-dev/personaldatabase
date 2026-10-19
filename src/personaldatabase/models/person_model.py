@@ -15,7 +15,8 @@ class PersonModel(Base):
     __tablename__ = "persons"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     school: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -28,10 +29,19 @@ class PersonModel(Base):
     birthdate: Mapped[date] = mapped_column(Date, nullable=False)
     picture: Mapped[str] = mapped_column(String(512), nullable=False)
     gender: Mapped[str] = mapped_column(String(50), nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
 
-    courses: Mapped[list["PersonCourseModel"]] = relationship(back_populates="person")
-    groups: Mapped[list["PersonGroupModel"]] = relationship(back_populates="person")
-    verv: Mapped[list["PersonVervModel"]] = relationship(back_populates="person")
-
+    #cascade "all, delete-orphan" sletter oppføringer i koblingstabellen om person blir slettet
+    courses: Mapped[list["PersonCourseModel"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan"
+    )
+    groups: Mapped[list["PersonGroupModel"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan"
+    )
+    verv: Mapped[list["PersonVervModel"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan"
+    )
