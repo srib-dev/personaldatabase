@@ -8,6 +8,7 @@ from personaldatabase.database.session import Base
 if TYPE_CHECKING:
     from personaldatabase.models.person_course_model import PersonCourseModel
     from personaldatabase.models.person_group_model import PersonGroupModel
+    from personaldatabase.models.person_program_model import PersonProgramModel
     from personaldatabase.models.person_verv_model import PersonVervModel
 
 
@@ -44,6 +45,10 @@ class PersonModel(Base):
         cascade="all, delete-orphan"
     )
     verv: Mapped[list["PersonVervModel"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan"
+    )
+    programs: Mapped[list["PersonProgramModel"]] = relationship(
         back_populates="person",
         cascade="all, delete-orphan"
     )
