@@ -1,29 +1,40 @@
-from fastapi import Depends, Header, HTTPException, status
+import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from personaldatabase.core.security import ALGORITHM, SECRET_KEY
 from personaldatabase.database.session import get_db
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_verv_model import PersonVervModel
 from personaldatabase.models.verv_model import VervModel
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-#MÅ ENDRES TIL JWT TOKENS FOR PRODUCTION (KUN FOR TESTING)
+
 def get_current_person(
-    x_person_id: int = Header(
-        ...,
-        alias="X-Person-ID",
-        description="ID til personen som utfører forespørselen",
-    ),
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> PersonModel:
-    """Henter personen som utfører forespørselen basert på X-Person-ID-headeren."""
-    person = db.get(PersonModel, x_person_id)
+    """Henter personen som utfører forespørselen basert på JWT Bearer-token."""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Kunne ikke validere innloggingsdetaljer",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        person_id_str: str | None = payload.get("sub")
+        if person_id_str is None:
+            raise credentials_exception
+        person_id = int(person_id_str)
+    except (jwt.InvalidTokenError, ValueError):
+        raise credentials_exception
+
+    person = db.get(PersonModel, person_id)
     if not person:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Ugyldig eller manglende person-identifikator",
-        )
+        raise credentials_exception
 
     if not person.is_active:
         raise HTTPException(

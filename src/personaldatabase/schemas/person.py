@@ -31,7 +31,7 @@ class person_base(BaseModel):
 
 # Skjema for å opprette ny person
 class person_create(person_base):
-    pass
+    password: str | None = None
 
 # Skjema for å oppdatere person
 
@@ -50,6 +50,7 @@ class person_update(BaseModel):
     birthdate: date | None = None
     picture: str | None = None
     gender: str | None = None
+    password: str | None = None
 
 # Filter for henting av data
 

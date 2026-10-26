@@ -22,7 +22,13 @@ pip install -r requirements.txt
 
 4
 
-uv run fastapi dev
+# Opprett .env i rotmappen:
+SECRET_KEY=din-hemmelige-nokkel
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=480
+ADMIN_EMAIL=admin@srib.no
+ADMIN_PASSWORD=Passord123
 
-# Lucid chart tables
-https://lucid.app/lucidchart/3d0c774b-9417-4057-9a45-79fd6ebd892e/edit?viewport_loc=-207%2C-980%2C1885%2C1806%2C0_0&invitationId=inv_7559a49e-1866-4496-9048-583be6edd3b1
+5
+
+uv run fastapi dev

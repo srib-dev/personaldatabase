@@ -32,6 +32,8 @@ class PersonModel(Base):
     gender: Mapped[str] = mapped_column(String(50), nullable=False)
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=True, nullable=False)
+    hashed_password: Mapped[str | None] = mapped_column(
+        String(255), nullable=True)
 
     #cascade "all, delete-orphan" sletter oppføringer i koblingstabellen om person blir slettet
     courses: Mapped[list["PersonCourseModel"]] = relationship(
