@@ -1,6 +1,6 @@
 from personaldatabase.schemas.filters import PersonFilterParams
 from datetime import date
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, update
 from sqlalchemy.orm import Session
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_group_model import PersonGroupModel
@@ -62,3 +62,31 @@ def get_filtered_persons(db: Session, filters: PersonFilterParams) -> list[Perso
     )
 
     return list(db.scalars(query).all())
+
+
+def get_current_semester_cutoff(today: date | None = None) -> date:
+    today = today or date.today()
+    # Frist 1. februar på våren og 1. september på høsten
+    if today.month >= 9:
+        return date(today.year, 8, 1)  # Kontrakt må være signert etter 1. aug i år
+    elif today.month >= 2:
+        return date(today.year, 1, 1)  # Kontrakt må være signert etter 1. jan i år
+    else:
+        # I januar gjelder fortsatt høstsemesteret fra året før
+        return date(today.year - 1, 8, 1)
+
+
+def deactivate_expired_persons(db: Session) -> int:
+    cutoff_date = get_current_semester_cutoff()
+    stmt = (
+        update(PersonModel)
+        .where(
+            PersonModel.is_active == True,
+            PersonModel.last_signed_contract < cutoff_date,
+        )
+        .values(is_active=False)
+    )
+    result = db.execute(stmt)
+    db.commit()
+    return result.rowcount
+
