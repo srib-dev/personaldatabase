@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from personaldatabase.database.session import get_db
 from personaldatabase.models.group_model import GroupModel
+from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_program_model import PersonProgramModel
 from personaldatabase.models.program_model import ProgramModel
@@ -132,8 +133,13 @@ def add_person_to_program(
     program_role: str = Query(..., min_length=1, description="Rollen personen har i programmet"),
     db: Session = Depends(get_db),
 ):
+    """
+    Personen må allerede være medlem av gruppen programmet tilhører.
+    Legg personen til i gruppen først via /groups/{group_id}/members.
+    """
     # 1. Sjekk at program og person finnes
-    if not db.get(ProgramModel, program_id):
+    program = db.get(ProgramModel, program_id)
+    if not program:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Program med ID {program_id} finnes ikke",
@@ -143,6 +149,17 @@ def add_person_to_program(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Person med ID {person_id} finnes ikke",
+        )
+
+    # Personen må være medlem av gruppen programmet tilhører
+    if not db.get(PersonGroupModel, (person_id, program.group_id)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Personen er ikke medlem av gruppen '{program.group.group_name}' "
+                f"(ID {program.group_id}) som programmet tilhører. "
+                "Legg personen til i gruppen først."
+            ),
         )
 
     # 2. Sjekk om personen allerede er med i programmet

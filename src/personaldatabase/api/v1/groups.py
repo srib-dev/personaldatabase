@@ -1,13 +1,15 @@
 from personaldatabase.schemas.person import person_response
 from datetime import timezone
 from datetime import datetime
-from sqlalchemy import select, or_
+from sqlalchemy import delete, select, or_
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from personaldatabase.database.session import get_db
 from personaldatabase.models.group_model import GroupModel
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_group_model import PersonGroupModel
+from personaldatabase.models.person_program_model import PersonProgramModel
+from personaldatabase.models.program_model import ProgramModel
 from personaldatabase.schemas.group import GroupCreate, GroupResponse
 from personaldatabase.schemas.person_group import (
     GroupMemberAdd,
@@ -185,5 +187,14 @@ def remove_person_from_group(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Personen er ikke medlem av denne gruppen",
         )
+
+    # Personen fjernes også fra alle program som tilhører gruppen
+    group_program_ids = select(ProgramModel.id).where(ProgramModel.group_id == group_id)
+    db.execute(
+        delete(PersonProgramModel).where(
+            PersonProgramModel.person_id == person_id,
+            PersonProgramModel.program_id.in_(group_program_ids),
+        )
+    )
     db.delete(membership)
     db.commit()

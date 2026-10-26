@@ -14,11 +14,14 @@ from personaldatabase.models.group_model import GroupModel
 from personaldatabase.models.person_course_model import PersonCourseModel
 from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_model import PersonModel
+from personaldatabase.models.person_program_model import PersonProgramModel
+from personaldatabase.models.program_model import ProgramModel
 from personaldatabase.models.person_verv_model import PersonVervModel
 from personaldatabase.models.verv_model import VervModel
 from personaldatabase.core.security import get_password_hash
 from personaldatabase.schemas.course import CourseResponse
 from personaldatabase.schemas.group import GroupResponse
+from personaldatabase.schemas.program import ProgramResponse
 from personaldatabase.schemas.person import (
     person_create,
     person_response,
@@ -255,6 +258,26 @@ def get_person_groups(id: int, db: Session = Depends(get_db)):
         select(GroupModel)
         .join(PersonGroupModel, GroupModel.id == PersonGroupModel.group_id)
         .where(PersonGroupModel.person_id == id)
+    )
+    return db.scalars(stmt).all()
+
+@router.get(
+    "/{id}/programs",
+    response_model=list[ProgramResponse],
+    summary="Hent alle program for en spesifikk person",
+)
+def get_person_programs(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    stmt = (
+        select(ProgramModel)
+        .join(PersonProgramModel, ProgramModel.id == PersonProgramModel.program_id)
+        .where(PersonProgramModel.person_id == id)
     )
     return db.scalars(stmt).all()
 
