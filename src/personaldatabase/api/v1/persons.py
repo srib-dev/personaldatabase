@@ -1,7 +1,8 @@
 from personaldatabase.schemas.filters import PersonFilterParams
+from datetime import date
 from typing import Annotated
 
-from personaldatabase.crud.person import get_filtered_persons
+from personaldatabase.crud.person import get_filtered_persons, update_last_signed_contract
 from sqlalchemy.util.typing import Literal
 from fastapi import Body
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -18,7 +19,11 @@ from personaldatabase.models.verv_model import VervModel
 from personaldatabase.core.security import get_password_hash
 from personaldatabase.schemas.course import CourseResponse
 from personaldatabase.schemas.group import GroupResponse
-from personaldatabase.schemas.person import person_create, person_response, person_update
+from personaldatabase.schemas.person import (
+    person_create,
+    person_response,
+    person_update,
+)
 from personaldatabase.schemas.verv import VervResponse
 
 
@@ -161,6 +166,36 @@ def toggle_person_active(id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(person)
     return person
+
+
+@router.patch(
+    "/{id}/contract",
+    response_model=person_response,
+    summary="Oppdater dato for sist signerte kontrakt",
+)
+def update_person_contract(
+    id: int,
+    last_signed_contract: date | None = Query(
+        None,
+        description="Dato for signert kontrakt (YYYY-MM-DD). Settes til dagens dato hvis tom.",
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Setter ny dato for sist signerte kontrakt. Personen blir aktiv hvis datoen
+    gjelder for inneværende semester, ellers inaktiv. Bruk /toggle-active for
+    å overstyre manuelt.
+    """
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    return update_last_signed_contract(
+        db, person, last_signed_contract or date.today()
+    )
 
 @router.patch("/{id}", response_model=person_response)
 def update_person(

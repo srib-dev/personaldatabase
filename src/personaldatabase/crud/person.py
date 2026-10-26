@@ -76,6 +76,20 @@ def get_current_semester_cutoff(today: date | None = None) -> date:
         return date(today.year - 1, 8, 1)
 
 
+def has_valid_contract(last_signed_contract: date, today: date | None = None) -> bool:
+    return last_signed_contract >= get_current_semester_cutoff(today)
+
+
+def update_last_signed_contract(
+    db: Session, person: PersonModel, last_signed_contract: date
+) -> PersonModel:
+    person.last_signed_contract = last_signed_contract
+    person.is_active = has_valid_contract(last_signed_contract)
+    db.commit()
+    db.refresh(person)
+    return person
+
+
 def deactivate_expired_persons(db: Session) -> int:
     cutoff_date = get_current_semester_cutoff()
     stmt = (
