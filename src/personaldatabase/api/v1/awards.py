@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from personaldatabase.api.deps import require_verv
 from personaldatabase.database.session import get_db
 from personaldatabase.models.award_model import AwardModel
 from personaldatabase.models.award_win_model import AwardWinModel
@@ -20,7 +21,11 @@ from personaldatabase.schemas.award import (
 from personaldatabase.schemas.person import person_response
 from personaldatabase.schemas.program import ProgramResponse
 
-router = APIRouter(prefix="/awards", tags=["Awards"])
+router = APIRouter(
+    prefix="/awards",
+    tags=["Awards"],
+    dependencies=[Depends(require_verv)],
+)
 
 
 def _award_win_query():

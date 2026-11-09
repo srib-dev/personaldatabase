@@ -1,6 +1,6 @@
 from personaldatabase.api.deps import require_admin
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from personaldatabase.database.session import get_db
@@ -15,6 +15,11 @@ router = APIRouter(prefix="/verv", tags=["Verv"], dependencies=[Depends(require_
 #router = APIRouter(prefix="/verv", tags=["Verv"])
 
 
+def _is_admin_verv(verv: VervModel) -> bool:
+    return verv.verv_name.strip().lower() == "admin" or verv.role.strip().lower() == "admin"
+
+
+
 @router.post(
     "/",
     response_model=VervResponse,
@@ -25,6 +30,12 @@ def create_verv(
     verv_in: VervCreate,
     db: Session = Depends(get_db),
 ):
+    if verv_in.verv_name.strip().lower() == "admin" or verv_in.role.strip().lower() == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kan ikke opprette et nytt verv med navn eller rolle 'Admin'",
+        )
+
     # Sjekker om vervet allerede eksisterer
     existing_verv = db.scalar(
         select(VervModel).where(VervModel.verv_name == verv_in.verv_name)
@@ -94,8 +105,76 @@ def delete_verv(id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Verv med ID {id} ble ikke funnet",
         )
+    if _is_admin_verv(verv):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Admin-vervet kan ikke slettes",
+        )
     db.delete(verv)
     db.commit()
+
+
+@router.post(
+    "/transfer-admin/{new_admin_id}",
+    response_model=VervMemberResponse,
+    summary="Overfør Admin-vervet til en annen person",
+)
+def transfer_admin_verv(
+    new_admin_id: int,
+    current_admin: PersonModel = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    if new_admin_id == current_admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Du har allerede Admin-vervet",
+        )
+
+    # 1. Finn den nye personen og verifiser at vedkommende kan logge inn
+    new_admin = db.get(PersonModel, new_admin_id)
+    if not new_admin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {new_admin_id} finnes ikke",
+        )
+    if not new_admin.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kan ikke overføre Admin-vervet til en deaktivert bruker",
+        )
+    if not new_admin.hashed_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kan ikke overføre Admin-vervet til en bruker uten passord",
+        )
+
+    # 2. Finn Admin-vervet
+    admin_verv = db.scalar(
+        select(VervModel).where(
+            or_(
+                VervModel.verv_name.ilike("Admin"),
+                VervModel.role.ilike("Admin"),
+            )
+        )
+    )
+    if not admin_verv:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Admin-vervet ble ikke funnet",
+        )
+
+    # 3. Fjern nåværende admin(s) og legg til ny admin i samme transaksjon
+    db.execute(
+        delete(PersonVervModel).where(PersonVervModel.verv_id == admin_verv.id)
+    )
+    new_membership = PersonVervModel(
+        person_id=new_admin_id,
+        verv_id=admin_verv.id,
+    )
+    db.add(new_membership)
+    db.commit()
+    db.refresh(new_membership)
+    return new_membership
 
 
 # Legge til person i et verv
@@ -111,10 +190,20 @@ def add_person_to_verv(
     db: Session = Depends(get_db),
 ):
     # 1. Sjekk at verv og person finnes
-    if not db.get(VervModel, verv_id):
+    verv = db.get(VervModel, verv_id)
+    if not verv:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Verv med ID {verv_id} finnes ikke",
+        )
+
+    if _is_admin_verv(verv):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Kun én person kan ha Admin-vervet av gangen. "
+                "Bruk /verv/transfer-admin/{new_admin_id} for å overføre vervet."
+            ),
         )
 
     if not db.get(PersonModel, person_id):
@@ -177,6 +266,16 @@ def remove_person_from_verv(
     person_id: int,
     db: Session = Depends(get_db),
 ):
+    verv = db.get(VervModel, verv_id)
+    if verv and _is_admin_verv(verv):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Kan ikke fjerne Admin direkte. "
+                "Bruk /verv/transfer-admin/{new_admin_id} for å overføre vervet til en annen person."
+            ),
+        )
+
     membership = db.get(PersonVervModel, (person_id, verv_id))
     if not membership:
         raise HTTPException(

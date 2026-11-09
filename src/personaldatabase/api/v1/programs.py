@@ -13,9 +13,14 @@ from personaldatabase.models.program_model import ProgramModel
 from personaldatabase.schemas.award import AwardWinResponse
 from personaldatabase.schemas.person import person_response
 from personaldatabase.schemas.person_program import ProgramMemberResponse
+from personaldatabase.api.deps import require_verv
 from personaldatabase.schemas.program import ProgramCreate, ProgramResponse
 
-router = APIRouter(prefix="/programs", tags=["Programs"])
+router = APIRouter(
+    prefix="/programs",
+    tags=["Programs"],
+    dependencies=[Depends(require_verv)],
+)
 
 
 @router.post(

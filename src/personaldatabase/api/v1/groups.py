@@ -11,6 +11,7 @@ from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_program_model import PersonProgramModel
 from personaldatabase.models.program_model import ProgramModel
 from personaldatabase.schemas.group import GroupCreate, GroupResponse
+from personaldatabase.api.deps import require_verv
 from personaldatabase.schemas.person_group import (
     GroupMemberAdd,
     GroupMemberResponse,
@@ -18,7 +19,11 @@ from personaldatabase.schemas.person_group import (
 
 
 
-router = APIRouter(prefix="/groups", tags=["Groups"])
+router = APIRouter(
+    prefix="/groups",
+    tags=["Groups"],
+    dependencies=[Depends(require_verv)],
+)
 
 
 @router.post(
