@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from personaldatabase.core.tasks import lifespan
 from personaldatabase.database.init_db import init_db
 from personaldatabase.database.session import Base, engine
 import personaldatabase.models
@@ -8,7 +9,7 @@ Base.metadata.create_all(bind=engine)
 init_db()
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(api_router, prefix="/api/v1")
 
