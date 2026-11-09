@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from personaldatabase.database.session import Base
 
 if TYPE_CHECKING:
+    from personaldatabase.models.award_win_person_model import AwardWinPersonModel
     from personaldatabase.models.person_course_model import PersonCourseModel
     from personaldatabase.models.person_group_model import PersonGroupModel
     from personaldatabase.models.person_program_model import PersonProgramModel
@@ -49,6 +50,10 @@ class PersonModel(Base):
         cascade="all, delete-orphan"
     )
     programs: Mapped[list["PersonProgramModel"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan"
+    )
+    award_wins: Mapped[list["AwardWinPersonModel"]] = relationship(
         back_populates="person",
         cascade="all, delete-orphan"
     )

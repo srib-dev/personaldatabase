@@ -6,9 +6,11 @@ from personaldatabase.crud.person import get_filtered_persons, update_last_signe
 from sqlalchemy.util.typing import Literal
 from fastapi import Body
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, or_
 from personaldatabase.database.session import get_db
+from personaldatabase.models.award_win_model import AwardWinModel
+from personaldatabase.models.award_win_person_model import AwardWinPersonModel
 from personaldatabase.models.course_model import CourseModel
 from personaldatabase.models.group_model import GroupModel
 from personaldatabase.models.person_course_model import PersonCourseModel
@@ -19,6 +21,7 @@ from personaldatabase.models.program_model import ProgramModel
 from personaldatabase.models.person_verv_model import PersonVervModel
 from personaldatabase.models.verv_model import VervModel
 from personaldatabase.core.security import get_password_hash
+from personaldatabase.schemas.award import AwardWinResponse
 from personaldatabase.schemas.course import CourseResponse
 from personaldatabase.schemas.group import GroupResponse
 from personaldatabase.schemas.program import ProgramResponse
@@ -320,6 +323,33 @@ def get_person_verv(id: int, db: Session = Depends(get_db)):
         select(VervModel)
         .join(PersonVervModel, VervModel.id == PersonVervModel.verv_id)
         .where(PersonVervModel.person_id == id)
+    )
+    return db.scalars(stmt).all()
+
+
+@router.get(
+    "/{id}/awards",
+    response_model=list[AwardWinResponse],
+    summary="Hent alle priser en spesifikk person har vunnet (personlig eller via program)",
+)
+def get_person_awards(id: int, db: Session = Depends(get_db)):
+    person = db.get(PersonModel, id)
+    if not person:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Person med ID {id} ble ikke funnet",
+        )
+
+    stmt = (
+        select(AwardWinModel)
+        .join(AwardWinPersonModel, AwardWinModel.id == AwardWinPersonModel.award_win_id)
+        .options(
+            selectinload(AwardWinModel.award),
+            selectinload(AwardWinModel.program),
+            selectinload(AwardWinModel.persons).selectinload(AwardWinPersonModel.person),
+        )
+        .where(AwardWinPersonModel.person_id == id)
+        .order_by(AwardWinModel.id.desc())
     )
     return db.scalars(stmt).all()
 

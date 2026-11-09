@@ -1,5 +1,13 @@
 """Pydantic schemas for data validation and serialization."""
 
+from personaldatabase.schemas.award import (
+    AwardCreate,
+    AwardResponse,
+    AwardUpdate,
+    AwardWinCreate,
+    AwardWinPersonResponse,
+    AwardWinResponse,
+)
 from personaldatabase.schemas.course import (
     CourseCreate,
     CourseResponse,
@@ -37,6 +45,12 @@ from personaldatabase.schemas.verv import (
 )
 
 __all__ = [
+    "AwardCreate",
+    "AwardResponse",
+    "AwardUpdate",
+    "AwardWinCreate",
+    "AwardWinPersonResponse",
+    "AwardWinResponse",
     "CourseCreate",
     "CourseMemberAdd",
     "CourseMemberResponse",

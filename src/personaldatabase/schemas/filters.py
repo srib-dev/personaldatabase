@@ -10,9 +10,10 @@ class PersonFilterParams(BaseModel):
     # Status
     is_active: Annotated[bool | None, Query(description="Filtrer på aktiv status")] = None
 
-    # Relasjoner: Verv og Avdeling/Gruppe
+    # Relasjoner: Verv, Avdeling/Gruppe og Priser
     verv_id: Annotated[int | None, Query(description="Filtrer etter ID på verv")] = None
     group_id: Annotated[int | None, Query(description="Filtrer etter ID på gruppe/avdeling")] = None
+    award_id: Annotated[int | None, Query(description="Filtrer etter ID på vunnet pris")] = None
 
     # Alder (regnes om til fødselsdato)
     min_age: Annotated[int | None, Query(ge=0, le=120, description="Minimumsalder i år")] = None
