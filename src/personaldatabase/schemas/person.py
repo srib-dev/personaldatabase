@@ -52,6 +52,7 @@ class person_update(BaseModel):
     gender: str | None = None
     password: str | None = None
 
+
 # Filter for henting av data
 
 
