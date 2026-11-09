@@ -27,10 +27,15 @@ from personaldatabase.schemas.person import (
     person_response,
     person_update,
 )
+from personaldatabase.api.deps import require_verv
 from personaldatabase.schemas.verv import VervResponse
 
 
-router = APIRouter(prefix="/persons", tags=["Persons"])
+router = APIRouter(
+    prefix="/persons",
+    tags=["Persons"],
+    dependencies=[Depends(require_verv)],
+)
 
 
 @router.post("/", response_model=person_response, status_code=status.HTTP_201_CREATED)

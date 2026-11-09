@@ -9,11 +9,16 @@ from personaldatabase.models.person_course_model import PersonCourseModel
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.schemas.course import CourseCreate, CourseResponse
 from personaldatabase.schemas.person import person_response
+from personaldatabase.api.deps import require_verv
 from personaldatabase.schemas.person_course import (
     CourseMemberResponse,
 )
 
-router = APIRouter(prefix="/courses", tags=["Courses"])
+router = APIRouter(
+    prefix="/courses",
+    tags=["Courses"],
+    dependencies=[Depends(require_verv)],
+)
 
 
 @router.post(
