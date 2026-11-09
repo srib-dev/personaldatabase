@@ -1,3 +1,6 @@
+from personaldatabase.models.award_model import AwardModel
+from personaldatabase.models.award_win_model import AwardWinModel
+from personaldatabase.models.award_win_person_model import AwardWinPersonModel
 from personaldatabase.models.course_model import CourseModel
 from personaldatabase.models.group_model import GroupModel
 from personaldatabase.models.person_course_model import PersonCourseModel
@@ -18,6 +21,9 @@ person_verv_model = PersonVervModel
 verv_model = VervModel
 
 __all__ = [
+    "AwardModel",
+    "AwardWinModel",
+    "AwardWinPersonModel",
     "CourseModel",
     "GroupModel",
     "PersonCourseModel",

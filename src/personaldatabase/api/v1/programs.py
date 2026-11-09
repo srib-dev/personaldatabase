@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from personaldatabase.database.session import get_db
+from personaldatabase.models.award_win_model import AwardWinModel
+from personaldatabase.models.award_win_person_model import AwardWinPersonModel
 from personaldatabase.models.group_model import GroupModel
 from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_program_model import PersonProgramModel
 from personaldatabase.models.program_model import ProgramModel
+from personaldatabase.schemas.award import AwardWinResponse
 from personaldatabase.schemas.person import person_response
 from personaldatabase.schemas.person_program import ProgramMemberResponse
 from personaldatabase.api.deps import require_verv
@@ -249,3 +252,32 @@ def remove_person_from_program(
         )
     db.delete(membership)
     db.commit()
+
+
+@router.get(
+    "/{program_id}/awards",
+    response_model=list[AwardWinResponse],
+    summary="Hent alle priser et spesifikt program har vunnet",
+)
+def get_program_awards(
+    program_id: int,
+    db: Session = Depends(get_db),
+):
+    program = db.get(ProgramModel, program_id)
+    if not program:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Program med ID {program_id} ble ikke funnet",
+        )
+
+    stmt = (
+        select(AwardWinModel)
+        .options(
+            selectinload(AwardWinModel.award),
+            selectinload(AwardWinModel.program),
+            selectinload(AwardWinModel.persons).selectinload(AwardWinPersonModel.person),
+        )
+        .where(AwardWinModel.program_id == program_id)
+        .order_by(AwardWinModel.id.desc())
+    )
+    return db.scalars(stmt).all()

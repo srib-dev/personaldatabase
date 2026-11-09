@@ -2,6 +2,8 @@ from personaldatabase.schemas.filters import PersonFilterParams
 from datetime import date
 from sqlalchemy import select, or_, update
 from sqlalchemy.orm import Session
+from personaldatabase.models.award_win_model import AwardWinModel
+from personaldatabase.models.award_win_person_model import AwardWinPersonModel
 from personaldatabase.models.person_model import PersonModel
 from personaldatabase.models.person_group_model import PersonGroupModel
 from personaldatabase.models.person_verv_model import PersonVervModel
@@ -34,6 +36,14 @@ def get_filtered_persons(db: Session, filters: PersonFilterParams) -> list[Perso
     if filters.group_id is not None:
         query = query.where(
             PersonModel.groups.any(PersonGroupModel.group_id == filters.group_id)
+        )
+
+    # 4b. Filtrering på vunnet Pris (enten individuelt eller via program)
+    if filters.award_id is not None:
+        query = query.where(
+            PersonModel.award_wins.any(
+                AwardWinPersonModel.award_win.has(AwardWinModel.award_id == filters.award_id)
+            )
         )
 
     # 5. Filtrering på Alder (regnes om til birthdate-datoer)
