@@ -70,3 +70,23 @@ def require_admin(
         )
 
     return current_person
+
+
+def require_verv(
+    current_person: PersonModel = Depends(get_current_person),
+    db: Session = Depends(get_db),
+) -> PersonModel:
+    """Verifiserer at den innloggede personen har minst ett verv (inkludert Admin)."""
+    stmt = select(PersonVervModel).where(
+        PersonVervModel.person_id == current_person.id
+    )
+    membership = db.scalar(stmt)
+
+    if not membership:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Kun personer med et verv har tilgang til denne handlingen",
+        )
+
+    return current_person
+
